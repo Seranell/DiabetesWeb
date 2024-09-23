@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Value Calculator</title>
+    <script src = 'calculation.js'></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: fit-content;
+            margin: 50px;
+        }
+        input, button, select {
+            margin: 5px;
+        }
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Meal Value Calculator</h1>
+    <div class="input-section">
+        <label for="breakfastValue">Breakfast:</label>
+        <input type="number" id="breakfastValue" min="2" max="24" required>
+
+        <label for="lunchValue">Lunch:</label>
+        <input type="number" id="lunchValue" min="2" max="24" required>
+
+        <label for="dinnerValue">Dinner:</label>
+        <input type="number" id="dinnerValue" min="2" max="24" required>
+
+        <label for="supperValue">Supper:</label>
+        <input type="number" id="supperValue" min="2" max="24" required>
+
+        <button onclick="saveMealValues()">Submit</button>
+    </div>
+
+    <div class="input-section">
+        <label for="mealEating">Which Meal:</label>
+        <select id="mealEating">
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+            <option value="supper">Supper</option>
+        </select>
+        <label for="carbAmount">Carb Amount:</label>
+        <input type="number" id="carbAmount" required>
+        <button onclick="calculateCarbs()">Calculate Carbs</button>
+    </div>
+
+    <h2>Carb Dose: <span id="result"></span></h2>
+
+    <div>
+        <h1>Correction Dose Calculator</h1>
+        <div>
+            <h2>Target Blood Glucose</h2>
+            <input type="number" id="target" required>
+            <button onclick="saveTargetValue()">Save Value</button>
+        </div>
+        <div class="input-section">
+            <label for="correction">Meal Time</label>
+            <select id="correction">
+                <option value="breakfastI">Breakfast</option>
+                <option value="lunchI">Lunch</option>
+                <option value="dinnerI">Dinner</option>
+                <option value="supperI">Supper</option>
+            </select>
+            <label for="correctionValue">Enter Insulin Sensitivity Value (mmol/L per unit)</label>
+            <input type="number" id="correctionValue" required>
+            <button onclick="saveCorrectionValue()">Save Value</button>
+        </div>
+        <div>
+            <h2>Current Blood Glucose</h2>
+            <input type="number" id="current" required>
+            <button onclick="calculateCorrection()">Calculate</button>
+        </div>
+        <h2>Correction Dose: <span id="correctionResult"></span></h2>
+    </div>
+
+    <div>
+        <h2>Total Insulin Dose: <span id="totalInsulinDose"></span></h2>
+    </div>
+
+</body>
+</html>

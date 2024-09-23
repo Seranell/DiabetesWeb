@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src = 'calculation.js'></script>
+</head>
+<body>
+    <div class="input-section">
+        <label for="mealEating">Which Meal:</label>
+        <select id="mealEating">
+            <option value="breakfast">Breakfast</option>
+            <option value="lunch">Lunch</option>
+            <option value="dinner">Dinner</option>
+            <option value="supper">Supper</option>
+        </select>
+        <label for="carbAmount">Carb Amount:</label>
+        <input type="number" id="carbAmount" required>
+        <button onclick="calculateCarbs()">Calculate Carbs</button>
+    </div>
+</div>
+    <h2>Carb Dose: <span id="result"></span></h2>
+
+    <div class="input-section">
+        <label for="correction">Meal Time</label>
+        <select id="correction">
+            <option value="breakfastI">Breakfast</option>
+            <option value="lunchI">Lunch</option>
+            <option value="dinnerI">Dinner</option>
+            <option value="supperI">Supper</option>
+        </select>
+    </div>
+    <div>
+        <h2>Current Blood Glucose</h2>
+        <input type="number" id="current" required>
+        <button onclick="calculateCorrection()">Calculate</button>
+    </div>
+    <h2>Correction Dose: <span id="correctionResult"></span></h2>
+</div>
+
+<div>
+    <h2>Total Insulin Dose: <span id="totalInsulinDose"></span></h2>
+</div>
+
+</body>
+</html>

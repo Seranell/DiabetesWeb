@@ -1,0 +1,18 @@
+{
+    "diary": [],
+    "mealValues": {
+      "breakfast": null,
+      "lunch": null,
+      "dinner": null,
+      "supper": null
+    },
+    "correctionValues": {
+      "breakfastI": null,
+      "lunchI": null,
+      "dinnerI": null,
+      "supperI": null,
+      "targetBloodGlucose": null,
+      "penType": "child"
+    }
+  }
+  
