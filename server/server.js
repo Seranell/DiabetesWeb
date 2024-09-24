@@ -27,15 +27,15 @@ const writeData = (data) => {
   fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2), 'utf8');
 };
 
-// Import authentication routes and middleware
+// Import authentication models and middleware
 const { router: authRouter, authenticateToken } = require('./auth/auth');
 
 // Import other route files
-const mealValuesRouter = require('./routes/meal-values');
-const correctionValuesRouter = require('./routes/correction-values');
-const diaryRouter = require('./routes/diary');
-const recipeRouter = require('./routes/recipes');
-const foodRouter = require('./routes/food');
+const mealValuesRouter = require('./models/meal-values');
+const correctionValuesRouter = require('./models/correction-values');
+const diaryRouter = require('./models/diary');
+const recipeRouter = require('./models/recipes');
+const foodRouter = require('./models/food');
 
 // Use the authentication router
 app.use('/api/auth', authRouter);
@@ -51,7 +51,7 @@ app.get('/api/data', (req, res) => {
   res.json(data);
 });
 
-// Use other routes
+// Use other models
 app.use('/api/meal-values', mealValuesRouter);
 app.use('/api/correction-values', correctionValuesRouter);
 app.use('/api/diary', diaryRouter);
