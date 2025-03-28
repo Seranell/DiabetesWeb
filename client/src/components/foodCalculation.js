@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 const fetchFoodData = async () => {
-  const response = await fetch('http://localhost:5000/api/food');
+  const response = await fetch('https://diabetesweb-backend.onrender.com/api/food');
   const data = await response.json();
   return data;
 };

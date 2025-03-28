@@ -29,7 +29,7 @@ const Graph = () => {
   const [diaryData, setDiaryData] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/diary')
+    fetch('https://diabetesweb-backend.onrender.com/api/diary')
       .then((response) => response.json())
       .then((data) => setDiaryData(data))
       .catch((error) => console.error('Error fetching diary data:', error));

@@ -11,7 +11,7 @@ const RecipeDetail = () => {
   useEffect(() => {
     if (!id) return;
 
-    fetch(`http://localhost:5000/api/recipes/${id}`)
+    fetch(`https://diabetesweb-backend.onrender.com/api/recipes/${id}`)
       .then(response => response.json())
       .then(data => {
         setRecipe(data);

@@ -10,7 +10,7 @@ const FoodSearch = () => {
   useEffect(() => {
     async function fetchFood() {
       try {
-        const response = await fetch('http://localhost:5000/api/food');
+        const response = await fetch('https://diabetesweb-backend.onrender.com/api/food');
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         console.log('Fetched data:', data); 

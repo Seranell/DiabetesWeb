@@ -14,7 +14,7 @@ const Diary = () => {
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/diary')
+    fetch('https://diabetesweb-backend.onrender.com/api/diary')
       .then((response) => response.json())
       .then((data) => {
         const sortedEntries = data.sort((a, b) => {
@@ -34,7 +34,7 @@ const Diary = () => {
   }, []);
 
   const handleDelete = (id) => {
-    fetch(`http://localhost:5000/api/diary/${id}`, {
+    fetch(`https://diabetesweb-backend.onrender.com/api/diary/${id}`, {
       method: 'DELETE',
     })
       .then(() => {
@@ -54,7 +54,7 @@ const Diary = () => {
   };
 
   const saveEdit = () => {
-    fetch(`http://localhost:5000/api/diary/${editedEntry.id}`, {
+    fetch(`https://diabetesweb-backend.onrender.com/api/diary/${editedEntry.id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ const Diary = () => {
   };
 
   const handleAddEntry = () => {
-    fetch('http://localhost:5000/api/diary', {
+    fetch('https://diabetesweb-backend.onrender.com/api/diary', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

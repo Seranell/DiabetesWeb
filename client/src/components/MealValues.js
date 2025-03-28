@@ -9,7 +9,7 @@ const MealValues = () => {
   });
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/data')
+    fetch('https://diabetesweb-backend.onrender.com/api/data')
       .then(response => response.json())
       .then(data => {
         if (data.mealValues) {
@@ -19,7 +19,7 @@ const MealValues = () => {
   }, []);
 
   const saveMealValues = () => {
-    fetch('http://localhost:5000/api/meal-values', {
+    fetch('https://diabetesweb-backend.onrender.com/api/meal-values', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(mealValues),

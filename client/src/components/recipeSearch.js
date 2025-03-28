@@ -11,7 +11,7 @@ const RecipeSearch = () => {
   useEffect(() => {
     async function fetchRecipes() {
       try {
-        const response = await fetch('http://localhost:5000/api/recipes');
+        const response = await fetch('https://diabetesweb-backend.onrender.com/api/recipes');
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
         setRecipes(data.recipes); 

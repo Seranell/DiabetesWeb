@@ -15,7 +15,7 @@ const CorrectionValues = () => {
     // Fetch saved correction values and pen type from the API
     const fetchCorrectionValues = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/correction-values');
+        const response = await fetch('https://diabetesweb-backend.onrender.com/api/correction-values');
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -40,7 +40,7 @@ const CorrectionValues = () => {
 
   const saveCorrectionValues = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/correction-values', {
+      const response = await fetch('https://diabetesweb-backend.onrender.com/api/correction-values', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

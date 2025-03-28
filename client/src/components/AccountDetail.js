@@ -15,7 +15,7 @@ const AccountDetails = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const correctionResponse = await fetch('http://localhost:5000/api/correction-values');
+        const correctionResponse = await fetch('https://diabetesweb-backend.onrender.com/api/correction-values');
         if (!correctionResponse.ok) throw new Error('Failed to fetch correction values');
         const correctionData = await correctionResponse.json();
         
@@ -23,7 +23,7 @@ const AccountDetails = () => {
         settargetBlood(correctionData.targetBlood || '');
         setPenType(correctionData.penType || '');
 
-        const mealResponse = await fetch('http://localhost:5000/api/meal-values');
+        const mealResponse = await fetch('https://diabetesweb-backend.onrender.com/api/meal-values');
         if (!mealResponse.ok) throw new Error('Failed to fetch meal values');
         const mealData = await mealResponse.json();
         setMealValues(mealData);
@@ -45,7 +45,7 @@ const AccountDetails = () => {
 
   const handleSaveClick = async () => {
     try {
-      await fetch('http://localhost:5000/api/correction-values', {
+      await fetch('https://diabetesweb-backend.onrender.com/api/correction-values', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -57,7 +57,7 @@ const AccountDetails = () => {
         }),
       });
 
-      await fetch('http://localhost:5000/api/meal-values', {
+      await fetch('https://diabetesweb-backend.onrender.com/api/meal-values', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

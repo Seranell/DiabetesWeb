@@ -24,23 +24,23 @@ const Calculation = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const mealResponse = await fetch('http://localhost:5000/api/meal-values');
+        const mealResponse = await fetch('https://diabetesweb-backend.onrender.com/api/meal-values');
         if (!mealResponse.ok) throw new Error('Failed to fetch meal values');
         const mealData = await mealResponse.json();
         setMealValues(mealData);
 
-        const correctionResponse = await fetch('http://localhost:5000/api/correction-values');
+        const correctionResponse = await fetch('https://diabetesweb-backend.onrender.com/api/correction-values');
         if (!correctionResponse.ok) throw new Error('Failed to fetch correction values');
         const correctionData = await correctionResponse.json();
         setCorrectionValues(correctionData);
         settargetBlood(correctionData.targetBlood || null);
         setPenType(correctionData.penType || 'child');
 
-        const foodResponse = await fetch('http://localhost:5000/api/food');
+        const foodResponse = await fetch('https://diabetesweb-backend.onrender.com/api/food');
         const foodData = await foodResponse.json();
         setFoodData(foodData);
 
-        const recipeResponse = await fetch('http://localhost:5000/api/recipes');
+        const recipeResponse = await fetch('https://diabetesweb-backend.onrender.com/api/recipes');
         if (!recipeResponse.ok) throw new Error('Failed to fetch recipes');
         const recipeData = await recipeResponse.json();
         setRecipes(recipeData.recipes);
@@ -173,7 +173,7 @@ const Calculation = () => {
     };
   
     try {
-      const response = await fetch('http://localhost:5000/api/diary', {
+      const response = await fetch('https://diabetesweb-backend.onrender.com/api/diary', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
