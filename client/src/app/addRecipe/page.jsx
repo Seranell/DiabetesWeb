@@ -1,11 +1,11 @@
-'use client';
+// 'use client';
 
-import AddRecipe from "../../components/recipeAdd";
+// import AddRecipe from "../../components/recipeAdd";
 
-export default function RecipeAdd(){
-    return(
-        <div>
-            <AddRecipe />
-        </div>
-    )
-}
+// export default function RecipeAdd(){
+//     return(
+//         <div>
+//             <AddRecipe />
+//         </div>
+//     )
+// }
