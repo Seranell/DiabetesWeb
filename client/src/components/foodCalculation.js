@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-// Utility function to fetch data
 const fetchFoodData = async () => {
   const response = await fetch('http://localhost:5000/api/food');
   const data = await response.json();
@@ -13,7 +12,6 @@ const CarbCalculator = () => {
   const [quantity, setQuantity] = useState(0);
   const [carbAmount, setCarbAmount] = useState(null);
 
-  // Fetch food data on component mount
   useEffect(() => {
     const getData = async () => {
       try {
@@ -69,11 +67,10 @@ const CarbCalculator = () => {
         setCarbAmount(0);
       }
     } else if (per_pack) {
-      // Handle snacks with per pack nutritional values
-      const carbsPerPack = parseFloat(per_pack.carbohydrate.replace('g', ''));
+      const carbsPerPack = parseFloat(per_pack.carbohydrate.replace('pack', ''));
       setCarbAmount(((carbsPerPack / quantity) * 100).toFixed(1));
     } else if (amount_per.includes('ml')) {
-      carbsPerUnit = parseFloat(nutritional_values.carbohydrate.replace('g', ''));
+      carbsPerUnit = parseFloat(nutritional_values.carbohydrate.replace('ml', ''));
       setCarbAmount(((carbsPerUnit / 100) * quantity).toFixed(1));
     } else if (amount_per.includes('g')) {
       carbsPerUnit = parseFloat(nutritional_values.carbohydrate.replace('g', ''));
@@ -96,7 +93,7 @@ const CarbCalculator = () => {
             type="number"
             value={quantity}
             onChange={handleQuantityChange}
-            placeholder="Quantity (items)"
+            placeholder="Quantity (slice)"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
           />
         </>

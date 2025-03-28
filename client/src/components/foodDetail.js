@@ -6,15 +6,14 @@ import { useParams } from 'next/navigation';
 const FoodDetail = () => {
   const [food, setFood] = useState(null);
   const [error, setError] = useState(null);
-  const { id } = useParams(); // Use router.query to get the dynamic route parameter
+  const { id } = useParams(); 
 
   useEffect(() => {
     if (!id) return;
 
-    fetch(`http://localhost:5000/api/food/${id}`) // Replace with your API URL
-      .then(response => response.json())
+    fetch(`http://localhost:5000/api/food/${id}`)
       .then(data => {
-        setFood(data); // Assuming data contains the full food object
+        setFood(data);
       })
       .catch(error => {
         setError(error);

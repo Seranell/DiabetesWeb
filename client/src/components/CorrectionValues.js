@@ -6,7 +6,7 @@ const CorrectionValues = () => {
     lunchI: null,
     dinnerI: null,
     supperI: null,
-    targetBloodGlucose: null,
+    targetBlood: null,
     penType: 'child', // Default to child pen
   });
   const [error, setError] = useState(null);
@@ -53,7 +53,7 @@ const CorrectionValues = () => {
       }
 
       alert('Correction values saved successfully');
-      setError(null); // Clear any previous errors
+      setError(null); 
     } catch (error) {
       console.error('Failed to save correction values:', error);
       setError('Failed to save correction values');
@@ -79,13 +79,13 @@ const CorrectionValues = () => {
         </div>
       ))}
       <div className="mb-4">
-        <label htmlFor="targetBloodGlucose" className="block text-lg font-medium mb-1">
+        <label htmlFor="targetBlood" className="block text-lg font-medium mb-1">
           Target Blood Glucose:
         </label>
         <input
           type="number"
-          id="targetBloodGlucose"
-          value={correctionValues.targetBloodGlucose || ''}
+          id="targetBlood"
+          value={correctionValues.targetBlood || ''}
           onChange={handleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-lg"
         />

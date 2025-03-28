@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
 const Calculation = () => {
-  // State for Calculation
   const [mealValues, setMealValues] = useState({});
   const [correctionValues, setCorrectionValues] = useState({});
-  const [targetBloodGlucose, setTargetBloodGlucose] = useState(null);
+  const [targetBlood, settargetBlood] = useState(null);
   const [selectedMeal, setSelectedMeal] = useState('breakfast');
   const [carbEntries, setCarbEntries] = useState([{ foodItem: '', amount: '', time: '' }]);
   const [carbDose, setCarbDose] = useState(null);
@@ -15,7 +14,6 @@ const Calculation = () => {
   const [notes, setNotes] = useState('');
   const [penType, setPenType] = useState('child');
   
-  // State for CarbCalculator
   const [foodData, setFoodData] = useState(null);
   const [selectedFood, setSelectedFood] = useState('');
   const [quantity, setQuantity] = useState(0);
@@ -23,30 +21,25 @@ const Calculation = () => {
   const [recipes, setRecipes] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState('');
 
-  // Fetch data on component mount
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch meal values
         const mealResponse = await fetch('http://localhost:5000/api/meal-values');
         if (!mealResponse.ok) throw new Error('Failed to fetch meal values');
         const mealData = await mealResponse.json();
         setMealValues(mealData);
 
-        // Fetch correction values
         const correctionResponse = await fetch('http://localhost:5000/api/correction-values');
         if (!correctionResponse.ok) throw new Error('Failed to fetch correction values');
         const correctionData = await correctionResponse.json();
         setCorrectionValues(correctionData);
-        setTargetBloodGlucose(correctionData.targetBloodGlucose || null);
+        settargetBlood(correctionData.targetBlood || null);
         setPenType(correctionData.penType || 'child');
 
-        // Fetch food data
         const foodResponse = await fetch('http://localhost:5000/api/food');
         const foodData = await foodResponse.json();
         setFoodData(foodData);
 
-        // Fetch recipes
         const recipeResponse = await fetch('http://localhost:5000/api/recipes');
         if (!recipeResponse.ok) throw new Error('Failed to fetch recipes');
         const recipeData = await recipeResponse.json();
@@ -61,7 +54,6 @@ const Calculation = () => {
     fetchData();
   }, []);
 
-  // Calculate carb amount based on selected food and quantity
   useEffect(() => {
     if (selectedFood && quantity > 0 && foodData) {
       const food = Object.values(foodData.categories).flat().find(item => item.id === selectedFood);
@@ -75,16 +67,16 @@ const Calculation = () => {
 
       if (amount_per.includes('slice') || (foodData.categories.Bread && foodData.categories.Bread.some(bread => bread.id === selectedFood))) {
         if (per_average_item) {
-          carbsPerUnit = parseFloat(per_average_item.carbohydrate.replace('g', ''));
+          carbsPerUnit = parseFloat(per_average_item.carbohydrate.replace('slice', ''));
           setCarbAmount((carbsPerUnit * quantity).toFixed(1));
         } else {
           setCarbAmount(0);
         }
       } else if (per_pack) {
-        const carbsPerPack = parseFloat(per_pack.carbohydrate.replace('g', ''));
+        const carbsPerPack = parseFloat(per_pack.carbohydrate.replace('packet', ''));
         setCarbAmount(((carbsPerPack / quantity) * 100).toFixed(1));
       } else if (amount_per.includes('ml')) {
-        carbsPerUnit = parseFloat(nutritional_values.carbohydrate.replace('g', ''));
+        carbsPerUnit = parseFloat(nutritional_values.carbohydrate.replace('ml', ''));
         setCarbAmount(((carbsPerUnit / 100) * quantity).toFixed(1));
       } else if (amount_per.includes('g')) {
         carbsPerUnit = parseFloat(nutritional_values.carbohydrate.replace('g', ''));
@@ -95,7 +87,6 @@ const Calculation = () => {
     }
   }, [selectedFood, quantity, foodData]);
 
-  // Calculate carb dose
   useEffect(() => {
     const savedValue = mealValues[selectedMeal];
     if (savedValue) {
@@ -108,7 +99,6 @@ const Calculation = () => {
     }
   }, [carbEntries, mealValues, selectedMeal, penType, carbAmount, selectedRecipe, recipes]);
 
-  // Calculate correction dose
   useEffect(() => {
     let newCorrectionDose = 0;
 
@@ -117,8 +107,8 @@ const Calculation = () => {
         newCorrectionDose = 0;
       } else {
         const correctionFactor = correctionValues[`${selectedMeal}I`] || 0;
-        if (correctionFactor > 0 && targetBloodGlucose !== null && !isNaN(currentBG)) {
-          const bgDifference = currentBG - targetBloodGlucose;
+        if (correctionFactor > 0 && targetBlood !== null && !isNaN(currentBG)) {
+          const bgDifference = currentBG - targetBlood;
           const dose = bgDifference / correctionFactor;
           newCorrectionDose = penType === 'adult' ? Math.round(dose) : Math.round(dose * 2) / 2;
         }
@@ -126,9 +116,8 @@ const Calculation = () => {
     }
 
     setCorrectionDose(newCorrectionDose);
-  }, [currentBG, correctionValues, selectedMeal, targetBloodGlucose, penType]);
+  }, [currentBG, correctionValues, selectedMeal, targetBlood, penType]);
 
-  // Calculate total insulin dose
   useEffect(() => {
     setTotalInsulinDose(carbDose + correctionDose);
   }, [carbDose, correctionDose]);
@@ -162,15 +151,14 @@ const Calculation = () => {
 
   const saveToDiary = async () => {
     const currentDateTime = new Date();
-    // Format the date as YYYY-MM-DD
-    const date = currentDateTime.toISOString().split('T')[0]; // Extracts the date part from the ISO string
+    const date = currentDateTime.toISOString().split('T')[0]; 
     const time = currentDateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   
     const diaryEntry = {
-      date, // Save date in YYYY-MM-DD format
+      date, 
       time,
       meal: selectedMeal,
-      foodItems: carbEntries.map(entry => `${recipes.find(recipe => recipe.id === selectedRecipe)?.name || ''} ${entry.foodItem} ${foodData && selectedFood ? foodData.categories.Bread.find(bread => bread.id === selectedFood)?.name || '' : ''}: ${entry.amount} ${ recipes.find(recipe => recipe.id === selectedRecipe)?.nutrition?.carbs || ''} ${parseFloat(carbAmount) || ''}g`).join(', '),
+      food: carbEntries.map(entry => `${recipes.find(recipe => recipe.id === selectedRecipe)?.name || ''} ${entry.foodItem} ${foodData && selectedFood ? foodData.categories.Bread.find(bread => bread.id === selectedFood)?.name || '' : ''}: ${entry.amount} ${ recipes.find(recipe => recipe.id === selectedRecipe)?.nutrition?.carbs || ''} ${parseFloat(carbAmount) || ''}g`).join(', '),
       selectedFood: foodData && selectedFood ? foodData.categories.Bread.find(bread => bread.id === selectedFood)?.name || '' : '',
       selectedFoodCarbs: parseFloat(carbAmount) || 0,
       recipeName: recipes.find(recipe => recipe.id === selectedRecipe)?.name || '',
@@ -214,7 +202,6 @@ const Calculation = () => {
 
   return (
     <div className="max-w-md mx-auto p-4">
-      {/* Select Meal */}
       <div className="mb-4">
         <label htmlFor="mealEating" className="block text-lg font-medium mb-1">Select Meal</label>
         <select
@@ -229,7 +216,6 @@ const Calculation = () => {
         </select>
       </div>
 
-      {/* Select Recipe */}
       <div className="mb-4">
         <label htmlFor="recipeSelect" className="block text-lg font-medium mb-1">Select Recipe (Optional)</label>
         <select
@@ -244,7 +230,6 @@ const Calculation = () => {
         </select>
       </div>
 
-      {/* Carb Inputs */}
       <div className="mb-4">
         <h3 className="text-3xl py-4">Carbs</h3>
         {carbEntries.map((entry, index) => (
@@ -278,7 +263,6 @@ const Calculation = () => {
         </button>
       </div>
 
-      {/* Food Selection */}
       <div className="mb-4">
         <label htmlFor="foodSelect" className="block text-lg font-medium mb-2">Select Food Item(Optional)</label>
         <select
@@ -298,7 +282,6 @@ const Calculation = () => {
         </select>
       </div>
 
-      {/* Quantity Input */}
       {selectedFood && foodData && (
         <div className="mb-4">
           <input
@@ -311,7 +294,6 @@ const Calculation = () => {
         </div>
       )}
 
-      {/* Results */}
       <div id="result" className="mb-4">
         <label className="block text-lg font-medium mb-1">Total Carb Amount</label>
         <div className="text-xl">{totalCarbAmount.toFixed(1)}g</div>

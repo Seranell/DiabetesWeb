@@ -43,7 +43,7 @@ router.post('/', (req, res) => {
       date: req.body.date || null,
       time: req.body.time || null,
       meal: req.body.meal || null,
-      foodItems: req.body.foodItems || null,
+      food: req.body.food || null,
       carbs: req.body.carbs || null,
       currentBG: req.body.currentBG || null,
       correctionDose: req.body.correctionDose || null,
@@ -66,7 +66,7 @@ router.post('/', (req, res) => {
         date: req.body.date || entries[index].date,
         time: req.body.time || entries[index].time, // Include time field
         meal: req.body.meal || entries[index].meal,
-        foodItems: req.body.foodItems || entries[index].foodItems,
+        food: req.body.food || entries[index].food,
         carbs: req.body.carbs || entries[index].carbs,
         currentBG: req.body.currentBG || entries[index].currentBG,
         correctionDose: req.body.correctionDose || entries[index].correctionDose,

@@ -3,28 +3,26 @@ import { useState, useEffect } from 'react';
 const AccountDetails = () => {
   const [correctionValues, setCorrectionValues] = useState({});
   const [mealValues, setMealValues] = useState({});
-  const [targetBloodGlucose, setTargetBloodGlucose] = useState(null);
+  const [targetBlood, settargetBlood] = useState(null);
   const [penType, setPenType] = useState('');
 
   const [editMode, setEditMode] = useState(false);
   const [tempCorrectionValues, setTempCorrectionValues] = useState({});
   const [tempMealValues, setTempMealValues] = useState({});
-  const [tempTargetBloodGlucose, setTempTargetBloodGlucose] = useState('');
+  const [temptargetBlood, setTemptargetBlood] = useState('');
   const [tempPenType, setTempPenType] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch correction values and extract targetBG and penType
         const correctionResponse = await fetch('http://localhost:5000/api/correction-values');
         if (!correctionResponse.ok) throw new Error('Failed to fetch correction values');
         const correctionData = await correctionResponse.json();
         
         setCorrectionValues(correctionData);
-        setTargetBloodGlucose(correctionData.targetBloodGlucose || '');
+        settargetBlood(correctionData.targetBlood || '');
         setPenType(correctionData.penType || '');
 
-        // Fetch meal values
         const mealResponse = await fetch('http://localhost:5000/api/meal-values');
         if (!mealResponse.ok) throw new Error('Failed to fetch meal values');
         const mealData = await mealResponse.json();
@@ -40,14 +38,13 @@ const AccountDetails = () => {
   const handleEditClick = () => {
     setTempCorrectionValues(correctionValues);
     setTempMealValues(mealValues);
-    setTempTargetBloodGlucose(targetBloodGlucose || '');
+    setTemptargetBlood(targetBlood || '');
     setTempPenType(penType);
     setEditMode(true);
   };
 
   const handleSaveClick = async () => {
     try {
-      // Update correction values including targetBG and penType
       await fetch('http://localhost:5000/api/correction-values', {
         method: 'PUT',
         headers: {
@@ -55,12 +52,11 @@ const AccountDetails = () => {
         },
         body: JSON.stringify({
           ...tempCorrectionValues,
-          targetBloodGlucose: tempTargetBloodGlucose,
+          targetBlood: temptargetBlood,
           penType: tempPenType,
         }),
       });
 
-      // Update meal values
       await fetch('http://localhost:5000/api/meal-values', {
         method: 'PUT',
         headers: {
@@ -69,10 +65,9 @@ const AccountDetails = () => {
         body: JSON.stringify(tempMealValues),
       });
 
-      // Update state with the new values
       setCorrectionValues(tempCorrectionValues);
       setMealValues(tempMealValues);
-      setTargetBloodGlucose(parseFloat(tempTargetBloodGlucose));
+      settargetBlood(parseFloat(temptargetBlood));
       setPenType(tempPenType);
       setEditMode(false);
     } catch (error) {
@@ -81,10 +76,9 @@ const AccountDetails = () => {
   };
 
   const handleCancelClick = () => {
-    // Reset temporary values and exit edit mode
     setTempCorrectionValues(correctionValues);
     setTempMealValues(mealValues);
-    setTempTargetBloodGlucose(targetBloodGlucose || '');
+    setTemptargetBlood(targetBlood || '');
     setTempPenType(penType);
     setEditMode(false);
   };
@@ -149,12 +143,12 @@ const AccountDetails = () => {
           {editMode ? (
             <input
               type="number"
-              value={tempTargetBloodGlucose}
-              onChange={(e) => setTempTargetBloodGlucose(e.target.value)}
+              value={temptargetBlood}
+              onChange={(e) => setTemptargetBlood(e.target.value)}
               className="p-1 border border-gray-300 rounded"
             />
           ) : (
-            <div className='px-5 text-xl'>{targetBloodGlucose || 'N/A'}</div>
+            <div className='px-5 text-xl'>{targetBlood || 'N/A'}</div>
           )}
         </div>
       </div>

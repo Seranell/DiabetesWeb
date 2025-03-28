@@ -5,17 +5,17 @@ const RecipeSearch = () => {
   const [search, setSearch] = useState('');
   const [recipes, setRecipes] = useState([]);
   const [filteredRecipes, setFilteredRecipes] = useState([]);
-  const [sortBy, setSortBy] = useState(''); // New state for sorting
+  const [sortBy, setSortBy] = useState(''); 
 
-  // Fetch recipes from an API or local file
+  
   useEffect(() => {
     async function fetchRecipes() {
       try {
-        const response = await fetch('http://localhost:5000/api/recipes'); // Replace with your API URL
+        const response = await fetch('http://localhost:5000/api/recipes');
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        setRecipes(data.recipes); // Adjust based on your API response structure
-        setFilteredRecipes(data.recipes); // Initialize filtered recipes
+        setRecipes(data.recipes); 
+        setFilteredRecipes(data.recipes);
       } catch (error) {
         console.error('Error fetching recipes:', error);
       }
@@ -23,7 +23,7 @@ const RecipeSearch = () => {
     fetchRecipes();
   }, []);
 
-  // Filter recipes based on search input
+ 
   useEffect(() => {
     const results = recipes.filter((recipe) =>
       recipe.name.toLowerCase().includes(search.toLowerCase())
@@ -31,12 +31,9 @@ const RecipeSearch = () => {
     setFilteredRecipes(results);
   }, [search, recipes]);
 
-  // Sort recipes based on selected nutrient
   const handleSort = (nutrient) => {
-    // Update the sortBy state to reflect the selected nutrient
     setSortBy(nutrient);
   
-    // Sort the recipes based on the selected nutrient
     const sortedRecipes = [...filteredRecipes].sort((a, b) => {
       switch (nutrient) {
         case 'calories':
@@ -48,11 +45,10 @@ const RecipeSearch = () => {
         case 'fat':
           return a.nutrition.fat - b.nutrition.fat;
         default:
-          return 0; // Default sort (could be alphabetical by name if desired)
+          return 0;
       }
     });
   
-    // Update the state with the sorted recipes
     setFilteredRecipes(sortedRecipes);
   };
 

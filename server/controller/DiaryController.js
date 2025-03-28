@@ -8,11 +8,11 @@ app.get('/api/diary', (req, res) => {
 
 // Add a new diary entry
 app.post('/api/diary', (req, res) => {
-  const { meal, foodItems, carbs, correctionDose, carbDose, totalInsulinDose, currentBG, notes, date, isToday } = req.body;
+  const { meal, food, carbs, correctionDose, carbDose, totalInsulinDose, currentBG, notes, date, isToday } = req.body;
   const newEntry = {
     id: nextId++,
     meal,
-    foodItems,
+    food,
     carbs,
     correctionDose,
     carbDose,
@@ -29,7 +29,7 @@ app.post('/api/diary', (req, res) => {
 // Update a diary entry
 app.put('/api/diary/:id', (req, res) => {
   const { id } = req.params;
-  const { meal, foodItems, carbs, correctionDose, carbDose, totalInsulinDose, currentBG, notes, date, isToday } = req.body;
+  const { meal, food, carbs, correctionDose, carbDose, totalInsulinDose, currentBG, notes, date, isToday } = req.body;
   const entryIndex = diaryEntries.findIndex(entry => entry.id === parseInt(id));
 
   if (entryIndex === -1) {
@@ -39,7 +39,7 @@ app.put('/api/diary/:id', (req, res) => {
   diaryEntries[entryIndex] = {
     id: parseInt(id),
     meal,
-    foodItems,
+    food,
     carbs,
     correctionDose,
     carbDose,

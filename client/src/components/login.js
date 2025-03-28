@@ -22,13 +22,9 @@ const Login = () => {
                 throw new Error(data.message || 'Something went wrong');
             }
 
-            // Save the JWT token in localStorage
             localStorage.setItem('token', data.token);
 
-            // Redirect or perform any action after successful login
             console.log('Login successful', data);
-            // For example, you could redirect to a protected page
-            // window.location.href = '/dashboard';
         } catch (err) {
             setError(err.message);
         }

@@ -3,6 +3,6 @@
   "lunchI": 1.5,
   "dinnerI": 1.5,
   "supperI": 2,
-  "targetBloodGlucose": 6,
+  "targetBlood": 6,
   "penType": "child"
 }

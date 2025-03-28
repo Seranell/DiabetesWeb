@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 const RecipeDetail = () => {
   const [recipe, setRecipe] = useState(null);
   const [error, setError] = useState(null);
-  const { id } = useParams(); // Use useParams to get the dynamic route parameter
+  const { id } = useParams(); 
 
   useEffect(() => {
     if (!id) return;
@@ -14,7 +14,7 @@ const RecipeDetail = () => {
     fetch(`http://localhost:5000/api/recipes/${id}`)
       .then(response => response.json())
       .then(data => {
-        setRecipe(data); // Assuming data contains the full recipe object
+        setRecipe(data);
       })
       .catch(error => {
         setError(error);

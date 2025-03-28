@@ -42,7 +42,7 @@ const Graph = () => {
   startOfWeek.setDate(today.getDate() - today.getDay() + 1);
   startOfWeek.setHours(0, 0, 0, 0);
 
-  const dateFormat = 'yyyy-MM-dd HH:mm'; // Using ISO format for consistency
+  const dateFormat = 'yyyy-MM-dd HH:mm'; 
 
   const filteredDiaryData = diaryData.filter((entry) => {
     const entryDate = parse(`${entry.date} ${entry.time || '00:00'}`, 'yyyy-MM-dd HH:mm', new Date());

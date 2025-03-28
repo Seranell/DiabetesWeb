@@ -16,7 +16,7 @@ const loadCorrectionValues = () => {
     lunchI: null,
     dinnerI: null,
     supperI: null,
-    targetBloodGlucose: null,
+    targetBlood: null,
     penType: 'child', // Default value
   };
 };
@@ -47,7 +47,7 @@ router.put('/', (req, res) => {
       typeof correctionValues.lunchI !== 'number' ||
       typeof correctionValues.dinnerI !== 'number' ||
       typeof correctionValues.supperI !== 'number' ||
-      typeof correctionValues.targetBloodGlucose !== 'number' ||
+      typeof correctionValues.targetBlood !== 'number' ||
       !['adult', 'child'].includes(correctionValues.penType)
     ) {
       return res.status(400).json({ message: 'Invalid input data' });

@@ -10,10 +10,10 @@ const FoodSearch = () => {
   useEffect(() => {
     async function fetchFood() {
       try {
-        const response = await fetch('http://localhost:5000/api/food'); // Replace with your API URL
+        const response = await fetch('http://localhost:5000/api/food');
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        console.log('Fetched data:', data); // Debug: Log fetched data
+        console.log('Fetched data:', data); 
         setFoodCategories(data.categories || {});
         setFilteredCategories(data.categories || {});
       } catch (error) {

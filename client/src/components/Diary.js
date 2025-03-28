@@ -11,25 +11,21 @@ const Diary = () => {
     notes: '',
     currentBG: '',
   });
-  const [isAdding, setIsAdding] = useState(false); // Control form visibility
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
-    // Fetch diary entries from API
     fetch('http://localhost:5000/api/diary')
       .then((response) => response.json())
       .then((data) => {
-        // Sort entries by date and time in descending order
         const sortedEntries = data.sort((a, b) => {
           const dateA = new Date(a.date);
           const dateB = new Date(b.date);
-          const timeA = new Date(`${a.date} ${a.time}`); // Combine date and time for comparison
+          const timeA = new Date(`${a.date} ${a.time}`); 
           const timeB = new Date(`${b.date} ${b.time}`);
 
-          // Compare dates first
           if (dateA > dateB) return -1;
           if (dateA < dateB) return 1;
 
-          // If dates are equal, compare times
           return timeB - timeA;
         });
         setEntries(sortedEntries);
@@ -147,7 +143,7 @@ const Diary = () => {
               value={newEntry.date}
               onChange={handleAddChange}
               className="w-full mb-2 px-2 py-1 border rounded-lg"
-              disabled // Date is auto-populated
+              disabled 
             />
             <input
               type="time"
@@ -155,7 +151,7 @@ const Diary = () => {
               value={newEntry.time}
               onChange={handleAddChange}
               className="w-full mb-2 px-2 py-1 border rounded-lg"
-              disabled // Time is auto-populated
+              disabled 
             />
             <input
               type="text"
@@ -239,7 +235,7 @@ const Diary = () => {
                   ) : (
                     <>
                       {renderEntryField('Meal', entry.meal)}
-                      {renderEntryField('Food Eaten', entry.foodItems)}
+                      {renderEntryField('Food Eaten', entry.food)}
                       {renderEntryField('Carbs', entry.carbs)}
                       {renderEntryField('Blood Sugar', entry.currentBG)}
                       {renderEntryField('Correction Dose', entry.correctionDose)}
