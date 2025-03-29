@@ -12,7 +12,7 @@ const CorrectionValues = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch saved correction values and pen type from the API
+    // Fetch saved correction values from the API
     const fetchCorrectionValues = async () => {
       try {
         const response = await fetch('https://diabetesweb-backend.onrender.com/api/correction-values');
@@ -30,14 +30,17 @@ const CorrectionValues = () => {
     fetchCorrectionValues();
   }, []);
 
+  // Handle input changes correctly for radio buttons and other inputs
   const handleChange = (event) => {
-    const { id, value, type, checked } = event.target;
+    const { id, value, type, checked, name } = event.target;
+
     setCorrectionValues((prevValues) => ({
       ...prevValues,
-      [id]: type === 'radio' ? (checked ? id : prevValues[id]) : parseFloat(value) || null,
+      [type === "radio" ? name : id]: type === "radio" ? (checked ? id : prevValues[name]) : parseFloat(value) || null,
     }));
   };
 
+  // Save correction values to the API
   const saveCorrectionValues = async () => {
     try {
       const response = await fetch('https://diabetesweb-backend.onrender.com/api/correction-values', {
@@ -53,7 +56,7 @@ const CorrectionValues = () => {
       }
 
       alert('Correction values saved successfully');
-      setError(null); 
+      setError(null);
     } catch (error) {
       console.error('Failed to save correction values:', error);
       setError('Failed to save correction values');
@@ -98,7 +101,7 @@ const CorrectionValues = () => {
               type="radio"
               id="adult"
               name="penType"
-              checked={correctionValues.penType === 'adult'}
+              checked={correctionValues.penType === "adult"}
               onChange={handleChange}
             />
             <span className="ml-2">Adult Pen</span>
@@ -108,7 +111,7 @@ const CorrectionValues = () => {
               type="radio"
               id="child"
               name="penType"
-              checked={correctionValues.penType === 'child'}
+              checked={correctionValues.penType === "child"}
               onChange={handleChange}
             />
             <span className="ml-2">Child Pen</span>
