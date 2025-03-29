@@ -3,42 +3,53 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 
-const filePath = path.join(__dirname, '../data/correction-values.json');
+// Directory to store user-specific correction values
+const dataDirectory = path.join(__dirname, '../data/correction-values');
 
-// Load correction values from JSON file
-const loadCorrectionValues = () => {
+// Ensure the directory exists
+if (!fs.existsSync(dataDirectory)) {
+  fs.mkdirSync(dataDirectory, { recursive: true });
+}
+
+// Load correction values for a specific user
+const loadCorrectionValues = (userId) => {
+  const filePath = path.join(dataDirectory, `${userId}.json`);
   if (fs.existsSync(filePath)) {
     const data = fs.readFileSync(filePath, 'utf8');
     return JSON.parse(data);
   }
+  // Return default values if user has no saved data
   return {
     breakfastI: null,
     lunchI: null,
     dinnerI: null,
     supperI: null,
     targetBlood: null,
-    penType: 'child', // Default value
+    penType: 'child',
   };
 };
 
-// Save correction values to JSON file
-const saveCorrectionValues = (values) => {
+// Save correction values for a specific user
+const saveCorrectionValues = (userId, values) => {
+  const filePath = path.join(dataDirectory, `${userId}.json`);
   fs.writeFileSync(filePath, JSON.stringify(values, null, 2), 'utf8');
 };
 
-// Get correction values
-router.get('/', (req, res) => {
+// GET correction values for a specific user
+router.get('/:userId', (req, res) => {
   try {
-    const correctionValues = loadCorrectionValues();
+    const { userId } = req.params;
+    const correctionValues = loadCorrectionValues(userId);
     res.json(correctionValues);
   } catch (error) {
     res.status(500).json({ message: 'Failed to retrieve correction values' });
   }
 });
 
-// Update correction values
-router.put('/', (req, res) => {
+// POST correction values for a specific user
+router.post('/:userId', (req, res) => {
   try {
+    const { userId } = req.params;
     const correctionValues = req.body;
 
     // Validate input
@@ -53,10 +64,10 @@ router.put('/', (req, res) => {
       return res.status(400).json({ message: 'Invalid input data' });
     }
 
-    saveCorrectionValues(correctionValues);
-    res.json({ message: 'Correction values updated successfully' });
+    saveCorrectionValues(userId, correctionValues);
+    res.json({ message: 'Correction values saved successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to update correction values' });
+    res.status(500).json({ message: 'Failed to save correction values' });
   }
 });
 
