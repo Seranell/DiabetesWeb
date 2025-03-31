@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { db, auth } from '../../../firebaseConfig';  // Firebase configuration import
+import { doc, getDoc, setDoc } from 'firebase/firestore';  // Firestore methods
+import { onAuthStateChanged } from 'firebase/auth';  // Firebase auth
 
 const MealValues = () => {
   const [mealValues, setMealValues] = useState({
@@ -7,36 +10,61 @@ const MealValues = () => {
     dinner: null,
     supper: null,
   });
+  const [userId, setUserId] = useState(null);  // Store current user's ID
 
-  // Fetch existing values on mount
+  // Listen for user authentication state
   useEffect(() => {
-    fetch('https://diabetesweb-backend.onrender.com/api/meal-values')
-      .then(response => {
-        if (!response.ok) throw new Error("Failed to fetch meal values");
-        return response.json();
-      })
-      .then(data => {
-        setMealValues(data);
-      })
-      .catch(error => {
-        console.error("Error fetching meal values:", error);
-      });
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);  // Save authenticated user's ID
+      } else {
+        setUserId(null);  // Clear user ID if not authenticated
+      }
+    });
+
+    return () => unsubscribe();  // Clean up the listener
   }, []);
 
-  // Save meal values
-  const saveMealValues = async () => {
-    try {
-      const response = await fetch('https://diabetesweb-backend.onrender.com/api/meal-values', {
-        method: 'PUT', // Use PUT instead of POST
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(mealValues),
-      });
+  // Fetch existing meal values on component mount
+  useEffect(() => {
+    const fetchMealValues = async () => {
+      if (!userId) return;  // Don't fetch if no user is authenticated
 
-      if (!response.ok) throw new Error("Failed to save meal values");
-      const data = await response.json();
-      alert(data.message);
+      try {
+        const docRef = doc(db, "users", userId, "mealValues", "data");  // Firestore path for the meal values document
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setMealValues(docSnap.data());  // Set the fetched data to state
+        } else {
+          console.log("No meal data found, using default values");
+          setMealValues({
+            breakfast: null,
+            lunch: null,
+            dinner: null,
+            supper: null,
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch meal values:', error);
+      }
+    };
+
+    fetchMealValues();
+  }, [userId]);
+
+  // Save meal values to Firestore
+  const saveMealValues = async () => {
+    if (!userId) {
+      console.error('User is not authenticated');
+      return;
+    }
+
+    try {
+      const docRef = doc(db, "users", userId, "mealValues", "data");  // Firestore path for saving the meal values
+      await setDoc(docRef, mealValues, { merge: true });  // Merge to avoid overwriting other data
+
+      alert('Meal values saved successfully');
     } catch (error) {
       console.error("Error saving meal values:", error);
     }
@@ -55,7 +83,7 @@ const MealValues = () => {
             id={`${meal}Value`}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             value={mealValues[meal] || ''}
-            onChange={(e) => setMealValues(prev => ({ ...prev, [meal]: parseFloat(e.target.value) }))}
+            onChange={(e) => setMealValues(prev => ({ ...prev, [meal]: parseFloat(e.target.value) }))}  // Update specific meal value
           />
         </div>
       ))}

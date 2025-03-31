@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { db, auth } from '../../../firebaseConfig';  // Import Firebase and auth
+import { doc, getDoc, setDoc, collection } from 'firebase/firestore';  // Firestore methods
+import { onAuthStateChanged } from 'firebase/auth';  // Listen for user auth state changes
 
 const CorrectionValues = () => {
   const [correctionValues, setCorrectionValues] = useState({
@@ -10,17 +13,44 @@ const CorrectionValues = () => {
     penType: 'child', // Default to child pen
   });
   const [error, setError] = useState(null);
+  const [userId, setUserId] = useState(null); // Store current user's ID
 
+  // Listen to authentication state changes
   useEffect(() => {
-    // Fetch saved correction values from the API
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);  // Save the authenticated user's ID
+      } else {
+        setUserId(null);  // Clear the user ID if not authenticated
+      }
+    });
+
+    return () => unsubscribe();  // Clean up the listener
+  }, []);
+
+  // Fetch saved correction values from Firestore for the authenticated user
+  useEffect(() => {
     const fetchCorrectionValues = async () => {
+      if (!userId) return;  // Don't fetch if no user is authenticated
+
       try {
-        const response = await fetch('https://diabetesweb-backend.onrender.com/api/correction-values');
-        if (!response.ok) {
-          throw new Error('Network response was not ok');
+        const docRef = doc(db, "users", userId, "correctionValues", "data");  // Reference the correctionValues sub-collection
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          console.log("Fetched data:", docSnap.data());
+          setCorrectionValues(docSnap.data());
+        } else {
+          console.log("No correction data found, using default values");
+          setCorrectionValues({
+            breakfastI: null,
+            lunchI: null,
+            dinnerI: null,
+            supperI: null,
+            targetBlood: null,
+            penType: 'child',
+          });
         }
-        const data = await response.json();
-        setCorrectionValues(data);
       } catch (error) {
         console.error('Failed to fetch correction values:', error);
         setError('Failed to fetch correction values');
@@ -28,7 +58,7 @@ const CorrectionValues = () => {
     };
 
     fetchCorrectionValues();
-  }, []);
+  }, [userId]);
 
   // Handle input changes correctly for radio buttons and other inputs
   const handleChange = (event) => {
@@ -40,20 +70,17 @@ const CorrectionValues = () => {
     }));
   };
 
-  // Save correction values to the API
+  // Save correction values to Firestore for the authenticated user
   const saveCorrectionValues = async () => {
-    try {
-      const response = await fetch('https://diabetesweb-backend.onrender.com/api/correction-values', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(correctionValues),
-      });
+    if (!userId) {
+      setError('You must be logged in to save your data');
+      return;
+    }
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
+    try {
+      const docRef = doc(db, "users", userId, "correctionValues", "data");  // Reference the correctionValues sub-collection
+      console.log("Saving data:", correctionValues);
+      await setDoc(docRef, correctionValues, { merge: true });  // Merge the data (not overwrite)
 
       alert('Correction values saved successfully');
       setError(null);

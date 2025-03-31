@@ -1,47 +1,53 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { db, auth } from '../../../firebaseConfig';
+import { doc, collection, getDocs, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const Diary = () => {
   const [entries, setEntries] = useState([]);
   const [isEditing, setIsEditing] = useState(null);
   const [editedEntry, setEditedEntry] = useState({});
   const [newEntry, setNewEntry] = useState({
-    date: '',
-    time: '',
+    timestamp: '',
+    selectedMeal: '',
+    carbEntries: [],
+    correctionDose: '',
+    carbDose: '',
+    totalInsulinDose: '',
     notes: '',
-    currentBG: '',
   });
   const [isAdding, setIsAdding] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    fetch('https://diabetesweb-backend.onrender.com/api/diary')
-      .then((response) => response.json())
-      .then((data) => {
-        const sortedEntries = data.sort((a, b) => {
-          const dateA = new Date(a.date);
-          const dateB = new Date(b.date);
-          const timeA = new Date(`${a.date} ${a.time}`); 
-          const timeB = new Date(`${b.date} ${b.time}`);
-
-          if (dateA > dateB) return -1;
-          if (dateA < dateB) return 1;
-
-          return timeB - timeA;
-        });
-        setEntries(sortedEntries);
-      })
-      .catch((error) => console.error('Error fetching diary entries:', error));
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+        fetchEntries(user.uid);
+      }
+    });
   }, []);
 
-  const handleDelete = (id) => {
-    fetch(`https://diabetesweb-backend.onrender.com/api/diary/${id}`, {
-      method: 'DELETE',
-    })
-      .then(() => {
-        const updatedEntries = entries.filter((entry) => entry.id !== id);
-        setEntries(updatedEntries);
-      })
-      .catch((error) => console.error('Error deleting diary entry:', error));
+  const fetchEntries = async (uid) => {
+    try {
+      const diaryRef = collection(db, 'users', uid, 'diary');
+      const snapshot = await getDocs(diaryRef);
+      const fetchedEntries = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const sortedEntries = fetchedEntries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      setEntries(sortedEntries);
+    } catch (error) {
+      console.error('Error fetching diary entries:', error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteDoc(doc(db, 'users', userId, 'diary', id));
+      setEntries(entries.filter(entry => entry.id !== id));
+    } catch (error) {
+      console.error('Error deleting entry:', error);
+    }
   };
 
   const handleEdit = (index) => {
@@ -49,67 +55,59 @@ const Diary = () => {
     setEditedEntry({ ...entries[index] });
   };
 
-  const handleEditChange = (value) => {
-    setEditedEntry((prev) => ({ ...prev, notes: value }));
+  const saveEdit = async () => {
+    try {
+      const docRef = doc(db, 'users', userId, 'diary', editedEntry.id);
+      await updateDoc(docRef, { notes: editedEntry.notes });
+      fetchEntries(userId);
+      setIsEditing(null);
+    } catch (error) {
+      console.error('Error updating entry:', error);
+    }
   };
 
-  const saveEdit = () => {
-    fetch(`https://diabetesweb-backend.onrender.com/api/diary/${editedEntry.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ notes: editedEntry.notes }),
-    })
-      .then((response) => response.json())
-      .then((updatedEntry) => {
-        const updatedEntries = entries.map((entry, index) =>
-          index === isEditing ? updatedEntry : entry
-        );
-        updatedEntries.sort((a, b) => new Date(b.date) - new Date(a.date));
-        setEntries(updatedEntries);
-        setIsEditing(null);
-      })
-      .catch((error) => console.error('Error saving diary entry:', error));
-  };
-
-  const handleAddChange = (e) => {
-    const { name, value } = e.target;
-    setNewEntry((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleAddEntry = () => {
-    fetch('https://diabetesweb-backend.onrender.com/api/diary', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newEntry),
-    })
-      .then((response) => response.json())
-      .then((addedEntry) => {
-        const updatedEntries = [addedEntry, ...entries];
-        setEntries(updatedEntries);
-        setNewEntry({ date: '', time: '', notes: '', currentBG: '' });
-        setIsAdding(false);
-      })
-      .catch((error) => console.error('Error adding diary entry:', error));
+  const handleAddEntry = async () => {
+    try {
+      const docRef = doc(collection(db, 'users', userId, 'diary'));
+      await setDoc(docRef, newEntry);
+      fetchEntries(userId);
+      setNewEntry({ timestamp: '', selectedMeal: '', carbEntries: [], correctionDose: '', carbDose: '', totalInsulinDose: '', notes: '' });
+      setIsAdding(false);
+    } catch (error) {
+      console.error('Error adding entry:', error);
+    }
   };
 
   const openAddEntryForm = () => {
     const now = new Date();
-    const currentDate = now.toISOString().split('T')[0];
-    const currentTime = now.toTimeString().split(' ')[0].slice(0, 5);
-    setNewEntry({ date: currentDate, time: currentTime, notes: '', currentBG: '' });
+    setNewEntry({
+      timestamp: now.toISOString(),
+      selectedMeal: '',
+      carbEntries: [],
+      correctionDose: '',
+      carbDose: '',
+      totalInsulinDose: '',
+      notes: '',
+    });
     setIsAdding(true);
   };
 
-  const formatDate = (dateString) => {
-    const [year, month, day] = dateString.split('-');
-    return `${day}/${month}/${year}`;
+  const handleAddChange = (e) => {
+    const { name, value } = e.target;
+    setNewEntry((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditChange = (value) => {
+    setEditedEntry((prev) => ({ ...prev, notes: value }));
+  };
+
+  const formatDate = (timestamp) => {
+    if (!timestamp) return 'Invalid Date';
+    try {
+      return new Date(timestamp).toLocaleDateString();
+    } catch {
+      return 'Invalid Date';
+    }
   };
 
   const renderEntryField = (label, value) => {
@@ -140,7 +138,7 @@ const Diary = () => {
             <input
               type="date"
               name="date"
-              value={newEntry.date}
+              value={newEntry.timestamp}
               onChange={handleAddChange}
               className="w-full mb-2 px-2 py-1 border rounded-lg"
               disabled 
@@ -148,7 +146,7 @@ const Diary = () => {
             <input
               type="time"
               name="time"
-              value={newEntry.time}
+              value={newEntry.timestamp}
               onChange={handleAddChange}
               className="w-full mb-2 px-2 py-1 border rounded-lg"
               disabled 
@@ -191,7 +189,7 @@ const Diary = () => {
       ) : (
         <div className="space-y-4">
           {entries.map((entry, index) => {
-            const entryDate = formatDate(entry.date);
+            const entryDate = formatDate(entry.timestamp);
             const todayDate = new Date().toLocaleDateString();
             const isToday = entryDate === todayDate;
             const time = entry.time;
@@ -208,7 +206,7 @@ const Diary = () => {
                   </h4>
                 </div>
                 <div className="p-4 border border-gray-300 rounded-tl-none rounded-lg">
-                  <h5 className='text-xl border border-gray-300 px-2'>{time}</h5>
+                  <h5 className="text-xl border border-gray-300 px-2">{time}</h5>
                   {isEditing === index ? (
                     <>
                       <textarea
@@ -234,9 +232,8 @@ const Diary = () => {
                     </>
                   ) : (
                     <>
-                      {renderEntryField('Meal', entry.meal)}
-                      {renderEntryField('Food Eaten', entry.food)}
-                      {renderEntryField('Carbs', entry.carbs)}
+                      {renderEntryField('Meal', entry.selectedMeal)}
+                      {renderEntryField('Carb Entries', entry.carbEntries.map((item) => `${item.foodItem} - ${item.amount}g`).join(', ') || 'N/A')}
                       {renderEntryField('Blood Sugar', entry.currentBG)}
                       {renderEntryField('Correction Dose', entry.correctionDose)}
                       {renderEntryField('Carb Dose', entry.carbDose)}
