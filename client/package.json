@@ -16,6 +16,7 @@
     "chartjs-adapter-date-fns": "^3.0.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "firebase": "^11.6.0",
     "fs": "^0.0.1-security",
     "http-proxy-middleware": "^3.0.0",
     "mongodb": "^6.8.0",
