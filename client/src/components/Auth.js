@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { auth, provider, signInWithPopup, signOut, db, doc, setDoc, getDoc } from '../../../firebaseConfig';
+import { auth, provider, signInWithPopup, signOut, db, doc, setDoc, getDoc } from '../../firebaseConfig';
 
 export default function AuthComponent() {
     const [user, setUser] = useState(null);
