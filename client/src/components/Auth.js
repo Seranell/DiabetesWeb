@@ -59,6 +59,10 @@ export default function AuthComponent() {
                         <h2 className="text-xl font-semibold">Welcome, {user.name}</h2>
                         <p className="text-sm text-gray-500">{user.email}</p>
                         <button className="mt-4" onClick={handleSignOut}>Sign Out</button>
+                        <div>
+                            <p>Lets get you set up!</p>
+                            
+                        </div>
                     </div>
                 ) : (
                     <button onClick={handleSignIn}>Sign In with Google</button>

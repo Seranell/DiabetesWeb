@@ -1,39 +1,62 @@
 import { useState, useEffect } from 'react';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../../firebaseConfig'; // Firebase config
 import Link from 'next/link';
 
 const RecipeSearch = () => {
   const [search, setSearch] = useState('');
   const [recipes, setRecipes] = useState([]);
   const [filteredRecipes, setFilteredRecipes] = useState([]);
-  const [sortBy, setSortBy] = useState(''); 
+  const [sortBy, setSortBy] = useState('');
 
-  
+  // Fetch recipes from Firebase
   useEffect(() => {
-    async function fetchRecipes() {
+    const fetchRecipes = async () => {
       try {
-        const response = await fetch('https://diabetesweb-backend.onrender.com/api/recipes');
-        if (!response.ok) throw new Error('Network response was not ok');
-        const data = await response.json();
-        setRecipes(data.recipes); 
-        setFilteredRecipes(data.recipes);
+        const querySnapshot = await getDocs(collection(db, 'recipes'));
+        const fetchedRecipes = querySnapshot.docs.map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            name: data.name || '',
+            image: data.image || '',
+            nutrition: {
+              calories: data.nutrition?.calories || 0,
+              protein: data.nutrition?.protein || 0,
+              carbs: data.nutrition?.carbs || 0,
+              fat: data.nutrition?.fat || 0,
+            },
+          };
+        });
+
+        setRecipes(fetchedRecipes);
+        setFilteredRecipes(fetchedRecipes);
       } catch (error) {
-        console.error('Error fetching recipes:', error);
+        console.error('Error fetching recipes from Firebase:', error);
       }
-    }
+    };
+
     fetchRecipes();
   }, []);
 
- 
+  // Handle search
   useEffect(() => {
+    if (!search.trim()) {
+      setFilteredRecipes(recipes);
+      return;
+    }
+
     const results = recipes.filter((recipe) =>
       recipe.name.toLowerCase().includes(search.toLowerCase())
     );
+
     setFilteredRecipes(results);
   }, [search, recipes]);
 
+  // Sorting functionality
   const handleSort = (nutrient) => {
     setSortBy(nutrient);
-  
+
     const sortedRecipes = [...filteredRecipes].sort((a, b) => {
       switch (nutrient) {
         case 'calories':
@@ -48,7 +71,7 @@ const RecipeSearch = () => {
           return 0;
       }
     });
-  
+
     setFilteredRecipes(sortedRecipes);
   };
 
@@ -75,11 +98,12 @@ const RecipeSearch = () => {
             <option value="fat">Fat</option>
           </select>
         </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredRecipes.length > 0 ? (
             filteredRecipes.map((recipe) => (
-              <a href={`/recipes/${recipe.id}`} key={recipe.id}>
-                <a className="rounded-lg shadow-md overflow-hidden block">
+              <Link href={`/recipes/${recipe.id}`} key={recipe.id}>
+                <div className="rounded-lg shadow-md overflow-hidden block cursor-pointer">
                   <img
                     src={recipe.image}
                     alt={recipe.name}
@@ -92,8 +116,8 @@ const RecipeSearch = () => {
                     <p className="text-gray-600">Carbs: {recipe.nutrition.carbs}g</p>
                     <p className="text-gray-600">Fat: {recipe.nutrition.fat}g</p>
                   </div>
-                </a>
-              </a>
+                </div>
+              </Link>
             ))
           ) : (
             <p>No recipes found</p>

@@ -1,20 +1,33 @@
 'use client';
 
-// import NavBar from "../components/nav/NavBar";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { auth } from "../../firebaseConfig"; // Adjust the path if needed
 import AuthComponent from "../components/Auth";
 
-export default function Welcome(){
-    return(
+export default function Welcome() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        router.push("/dashboard"); // Redirect to dashboard if authenticated
+      } else {
+        setLoading(false); // Show AuthComponent if unauthenticated
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) return <p>Loading...</p>; // Optional loading state
+
+  return (
     <div>
-        {/* <NavBar />
-    <div className = 'px-16 py-16'>
-            <h1 className = 'text-6xl font-bold'>Welcome</h1>
-            <h2 className = 'text-4xl'>Lets Get Started</h2>
-            <a href = '/carb' className = 'button'>Next</a>
-    </div>     */}
-        <div>
-      <AuthComponent />
+      <div>
+        <AuthComponent />
+      </div>
     </div>
-   </div>
-    )
+  );
 }
