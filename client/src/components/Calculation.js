@@ -113,6 +113,7 @@ const Calculation = () => {
           <option className="bg-white text-black" value="breakfast">Breakfast</option>
           <option className="bg-white text-black" value="lunch">Lunch</option>
           <option className="bg-white text-black" value="dinner">Dinner</option>
+          <option className="bg-white text-black" value="supper">Supper</option>
         </select>
       </div>
 
