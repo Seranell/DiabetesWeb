@@ -1,48 +1,53 @@
+'use client';
+
 import { useState, useEffect } from 'react';
-import { db, auth } from '../../firebaseConfig';  // Firebase configuration import
-import { doc, getDoc, setDoc } from 'firebase/firestore';  // Firestore methods
-import { onAuthStateChanged } from 'firebase/auth';  // Firebase auth
+import { useRouter } from 'next/navigation'; // ✅ Use next/navigation for routing
+import { db, auth } from '../../firebaseConfig';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const MealValues = () => {
   const [mealValues, setMealValues] = useState({
-    breakfast: null,
-    lunch: null,
-    dinner: null,
-    supper: null,
+    breakfast: '',
+    lunch: '',
+    dinner: '',
+    supper: '',
   });
-  const [userId, setUserId] = useState(null);  // Store current user's ID
+  const [userId, setUserId] = useState(null);
+  const [isValid, setIsValid] = useState(false);
+  const router = useRouter(); // ✅ Initialize router
 
   // Listen for user authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUserId(user.uid);  // Save authenticated user's ID
+        setUserId(user.uid);
       } else {
-        setUserId(null);  // Clear user ID if not authenticated
+        setUserId(null);
       }
     });
 
-    return () => unsubscribe();  // Clean up the listener
+    return () => unsubscribe();
   }, []);
 
   // Fetch existing meal values on component mount
   useEffect(() => {
     const fetchMealValues = async () => {
-      if (!userId) return;  // Don't fetch if no user is authenticated
+      if (!userId) return;
 
       try {
-        const docRef = doc(db, "users", userId, "mealValues", "data");  // Firestore path for the meal values document
+        const docRef = doc(db, "users", userId, "mealValues", "data");
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          setMealValues(docSnap.data());  // Set the fetched data to state
+          setMealValues(docSnap.data());
         } else {
           console.log("No meal data found, using default values");
           setMealValues({
-            breakfast: null,
-            lunch: null,
-            dinner: null,
-            supper: null,
+            breakfast: '',
+            lunch: '',
+            dinner: '',
+            supper: '',
           });
         }
       } catch (error) {
@@ -53,7 +58,13 @@ const MealValues = () => {
     fetchMealValues();
   }, [userId]);
 
-  // Save meal values to Firestore
+  useEffect(() => {
+    const allFieldsFilled = Object.values(mealValues).every(
+      (value) => value !== '' && !isNaN(value)
+    );
+    setIsValid(allFieldsFilled);
+  }, [mealValues]);
+
   const saveMealValues = async () => {
     if (!userId) {
       console.error('User is not authenticated');
@@ -61,10 +72,11 @@ const MealValues = () => {
     }
 
     try {
-      const docRef = doc(db, "users", userId, "mealValues", "data");  // Firestore path for saving the meal values
-      await setDoc(docRef, mealValues, { merge: true });  // Merge to avoid overwriting other data
+      const docRef = doc(db, "users", userId, "mealValues", "data");
+      await setDoc(docRef, mealValues, { merge: true });
 
       alert('Meal values saved successfully');
+      router.push('/correction');
     } catch (error) {
       console.error("Error saving meal values:", error);
     }
@@ -83,13 +95,20 @@ const MealValues = () => {
             id={`${meal}Value`}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             value={mealValues[meal] || ''}
-            onChange={(e) => setMealValues(prev => ({ ...prev, [meal]: parseFloat(e.target.value) }))}  // Update specific meal value
+            onChange={(e) =>
+              setMealValues(prev => ({ ...prev, [meal]: e.target.value }))
+            }
           />
         </div>
       ))}
       <button
         onClick={saveMealValues}
-        className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-4 hover:bg-blue-600"
+        disabled={!isValid}
+        className={`px-4 py-2 rounded-lg mt-4 ${
+          isValid
+            ? "bg-blue-500 text-white hover:bg-blue-600"
+            : "bg-blue-500  bg-opacity-25 text-gray-500 cursor-not-allowed"
+        }`}
       >
         Save Meal Values
       </button>

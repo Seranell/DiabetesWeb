@@ -15,7 +15,7 @@ const NavBar = () => {
         </div>
         <div className="hidden md:block">
           <div className="flex space-x-4">
-            <a href="/" className="text-white hover:text-gray-200">Home</a>
+            <a href="/dashboard" className="text-white hover:text-gray-200">Home</a>
             <a href="/diary" className="text-white hover:text-gray-200">Diary</a>
             <a href="/calculation" className="text-white hover:text-gray-200">Calculator</a>
             <a href="/recipes" className="text-white hover:text-gray-200">Recipes</a>

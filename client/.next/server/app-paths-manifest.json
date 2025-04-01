@@ -1,8 +1,7 @@
 {
+  "/dashboard/page": "app/dashboard/page.js",
+  "/account/page": "app/account/page.js",
+  "/carb/page": "app/carb/page.js",
   "/page": "app/page.js",
-  "/diary/page": "app/diary/page.js",
-  "/recipes/page": "app/recipes/page.js",
-  "/calculation/page": "app/calculation/page.js",
-  "/recipes/[id]/page": "app/recipes/[id]/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
+  "/correction/page": "app/correction/page.js"
 }

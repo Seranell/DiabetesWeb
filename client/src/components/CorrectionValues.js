@@ -1,53 +1,56 @@
+'use client';
+
 import { useState, useEffect } from 'react';
-import { db, auth } from '../../firebaseConfig';  // Import Firebase and auth
-import { doc, getDoc, setDoc, collection } from 'firebase/firestore';  // Firestore methods
-import { onAuthStateChanged } from 'firebase/auth';  // Listen for user auth state changes
+import { useRouter } from 'next/navigation';
+import { db, auth } from '../../firebaseConfig';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const CorrectionValues = () => {
   const [correctionValues, setCorrectionValues] = useState({
-    breakfastI: null,
-    lunchI: null,
-    dinnerI: null,
-    supperI: null,
-    targetBlood: null,
+    breakfastI: '',
+    lunchI: '',
+    dinnerI: '',
+    supperI: '',
+    targetBlood: '',
     penType: 'child', // Default to child pen
   });
   const [error, setError] = useState(null);
-  const [userId, setUserId] = useState(null); // Store current user's ID
+  const [userId, setUserId] = useState(null);
+  const [isValid, setIsValid] = useState(false);
+  const router = useRouter();
 
   // Listen to authentication state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUserId(user.uid);  // Save the authenticated user's ID
+        setUserId(user.uid);
       } else {
-        setUserId(null);  // Clear the user ID if not authenticated
+        setUserId(null);
       }
     });
 
-    return () => unsubscribe();  // Clean up the listener
+    return () => unsubscribe();
   }, []);
 
-  // Fetch saved correction values from Firestore for the authenticated user
+  // Fetch correction values
   useEffect(() => {
     const fetchCorrectionValues = async () => {
-      if (!userId) return;  // Don't fetch if no user is authenticated
+      if (!userId) return;
 
       try {
-        const docRef = doc(db, "users", userId, "correctionValues", "data");  // Reference the correctionValues sub-collection
+        const docRef = doc(db, "users", userId, "correctionValues", "data");
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          console.log("Fetched data:", docSnap.data());
           setCorrectionValues(docSnap.data());
         } else {
-          console.log("No correction data found, using default values");
           setCorrectionValues({
-            breakfastI: null,
-            lunchI: null,
-            dinnerI: null,
-            supperI: null,
-            targetBlood: null,
+            breakfastI: '',
+            lunchI: '',
+            dinnerI: '',
+            supperI: '',
+            targetBlood: '',
             penType: 'child',
           });
         }
@@ -60,17 +63,31 @@ const CorrectionValues = () => {
     fetchCorrectionValues();
   }, [userId]);
 
-  // Handle input changes correctly for radio buttons and other inputs
+  // ✅ Improved Validation Logic
+  useEffect(() => {
+    // Check that all fields are filled and have valid numbers
+    const allFieldsFilled = Object.entries(correctionValues).every(([key, value]) => {
+      // Ensure penType can be 'child' or 'adult' and numbers are valid
+      if (key === "penType") {
+        return value === "child" || value === "adult";
+      }
+      return value !== '' && !isNaN(parseFloat(value));
+    });
+
+    setIsValid(allFieldsFilled);
+  }, [correctionValues]);
+
+  // Handle input changes
   const handleChange = (event) => {
     const { id, value, type, checked, name } = event.target;
 
     setCorrectionValues((prevValues) => ({
       ...prevValues,
-      [type === "radio" ? name : id]: type === "radio" ? (checked ? id : prevValues[name]) : parseFloat(value) || null,
+      [type === "radio" ? name : id]: type === "radio" ? (checked ? id : prevValues[name]) : value,
     }));
   };
 
-  // Save correction values to Firestore for the authenticated user
+  // Save correction values and navigate
   const saveCorrectionValues = async () => {
     if (!userId) {
       setError('You must be logged in to save your data');
@@ -78,12 +95,12 @@ const CorrectionValues = () => {
     }
 
     try {
-      const docRef = doc(db, "users", userId, "correctionValues", "data");  // Reference the correctionValues sub-collection
-      console.log("Saving data:", correctionValues);
-      await setDoc(docRef, correctionValues, { merge: true });  // Merge the data (not overwrite)
+      const docRef = doc(db, "users", userId, "correctionValues", "data");
+      await setDoc(docRef, correctionValues, { merge: true });
 
       alert('Correction values saved successfully');
       setError(null);
+      router.push('/dashboard'); // Redirect after saving
     } catch (error) {
       console.error('Failed to save correction values:', error);
       setError('Failed to save correction values');
@@ -92,8 +109,9 @@ const CorrectionValues = () => {
 
   return (
     <div className="max-w-md mx-auto p-4">
-      <h2 className="text-3xl mb-4">Enter Correction Values</h2>
+      <h2 className="text-3xl font-bold mb-4">Enter Correction Values</h2>
       {error && <div className="text-red-500 mb-4">{error}</div>}
+
       {['breakfastI', 'lunchI', 'dinnerI', 'supperI'].map((correction) => (
         <div key={correction} className="mb-4">
           <label htmlFor={correction} className="block text-lg font-medium mb-1">
@@ -108,6 +126,7 @@ const CorrectionValues = () => {
           />
         </div>
       ))}
+
       <div className="mb-4">
         <label htmlFor="targetBlood" className="block text-lg font-medium mb-1">
           Target Blood Glucose:
@@ -120,34 +139,39 @@ const CorrectionValues = () => {
           className="w-full px-3 py-2 border border-gray-300 rounded-lg"
         />
       </div>
+
       <div className="mb-4">
         <label className="block text-lg font-medium mb-1">Select Pen Type:</label>
-        <div>
-          <label className="mr-4">
-            <input
-              type="radio"
-              id="adult"
-              name="penType"
-              checked={correctionValues.penType === "adult"}
-              onChange={handleChange}
-            />
-            <span className="ml-2">Adult Pen</span>
-          </label>
-          <label>
-            <input
-              type="radio"
-              id="child"
-              name="penType"
-              checked={correctionValues.penType === "child"}
-              onChange={handleChange}
-            />
-            <span className="ml-2">Child Pen</span>
-          </label>
-        </div>
+        <label className="mr-4">
+          <input
+            type="radio"
+            id="adult"
+            name="penType"
+            checked={correctionValues.penType === "adult"}
+            onChange={handleChange}
+          />
+          <span className="ml-2">Adult Pen</span>
+        </label>
+        <label>
+          <input
+            type="radio"
+            id="child"
+            name="penType"
+            checked={correctionValues.penType === "child"}
+            onChange={handleChange}
+          />
+          <span className="ml-2">Child Pen</span>
+        </label>
       </div>
+
       <button
         onClick={saveCorrectionValues}
-        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+        disabled={!isValid}
+        className={`px-4 py-2 rounded-lg mt-4 ${
+          isValid
+            ? "bg-blue-500 text-white hover:bg-blue-600"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+        }`}
       >
         Save Correction Values
       </button>

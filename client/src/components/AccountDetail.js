@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { db, auth, provider, signOut } from '../../firebaseConfig';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
 
 const AccountDetails = () => {
   const [correctionValues, setCorrectionValues] = useState({});
@@ -17,6 +18,8 @@ const AccountDetails = () => {
 
   const [userId, setUserId] = useState(null);
   const [user, setUser] = useState(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -95,12 +98,12 @@ const AccountDetails = () => {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      router.push("/");
     } catch (error) {
       console.error('Logout Error:', error);
       alert(`Error signing out: ${error.message}`);
     }
   };
-
   const handleCancelClick = () => {
     setEditMode(false);
   };
