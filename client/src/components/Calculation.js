@@ -77,9 +77,11 @@ const Calculation = () => {
       if(currentBG < 3.9){
         setWarningMsg('Hypo Warning: Blood Sugars are low, please follow advice given by your gp or nurse')
         setCorrectionDose(0);
-      } else if(currentBG < 6.9){
+      } else if (currentBG > 3.9 && currentBG < 6.9){
+        setWarningMsg('');
         setCorrectionDose(0);
       } else if (correctionFactor > 0 && targetBlood !== null) {
+        setWarningMsg('');
         const bgDifference = currentBG - targetBlood;
         const dose = bgDifference / correctionFactor;
         setCorrectionDose(penType === 'adult' ? Math.round(dose) : Math.round(dose * 2) / 2);
