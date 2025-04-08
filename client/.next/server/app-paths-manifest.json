@@ -1,10 +1,7 @@
 {
   "/account/page": "app/account/page.js",
   "/page": "app/page.js",
-  "/carb/page": "app/carb/page.js",
   "/correction/page": "app/correction/page.js",
   "/calculation/page": "app/calculation/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/recipes/page": "app/recipes/page.js",
-  "/diary/page": "app/diary/page.js"
+  "/carb/page": "app/carb/page.js"
 }

@@ -16,8 +16,8 @@ const Calculation = () => {
   const [notes, setNotes] = useState('');
   const [penType, setPenType] = useState('child');
   const [userId, setUserId] = useState(null);
+  const [warningMsg, setWarningMsg] = useState('');
 
-  // New for recipes
   const [recipes, setRecipes] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState('');
 
@@ -74,7 +74,12 @@ const Calculation = () => {
   useEffect(() => {
     if (currentBG !== null) {
       const correctionFactor = correctionValues[`${selectedMeal}I`] || 0;
-      if (correctionFactor > 0 && targetBlood !== null) {
+      if(currentBG < 3.9){
+        setWarningMsg('Hypo Warning: Blood Sugars are low, please follow advice given by your gp or nurse')
+        setCorrectionDose(0);
+      } else if(currentBG < 6.9){
+        setCorrectionDose(0);
+      } else if (correctionFactor > 0 && targetBlood !== null) {
         const bgDifference = currentBG - targetBlood;
         const dose = bgDifference / correctionFactor;
         setCorrectionDose(penType === 'adult' ? Math.round(dose) : Math.round(dose * 2) / 2);
@@ -101,7 +106,6 @@ const Calculation = () => {
     setCarbEntries(updatedEntries);
   };
 
-  // ✅ Handle Recipe Selection
   const handleRecipeSelection = (e) => {
     setSelectedRecipe(e.target.value);
 
@@ -152,8 +156,12 @@ const Calculation = () => {
         <label htmlFor="currentBG" className="block text-lg font-medium mb-1">Current Blood Glucose</label>
         <input type="number" id="currentBG" value={currentBG || ''} onChange={handleCurrentBGChange} className="w-full px-3 py-2 border border-gray-300 rounded-lg" />
       </div>
+      {warningMsg && (
+  <div className="mb-4 p-3 bg-yellow-100 text-yellow-800 border border-yellow-300 rounded-lg">
+    {warningMsg}
+  </div>
+)}
 
-      {/* 🧁 Recipe Selection */}
       <div className="mb-4">
         <label className="block text-lg font-medium mb-1">Select Recipe</label>
         <select value={selectedRecipe} onChange={handleRecipeSelection} className="w-full px-3 py-2 border border-gray-300 rounded-lg">
