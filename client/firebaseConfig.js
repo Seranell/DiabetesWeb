@@ -1,7 +1,22 @@
-// firebaseConfig.js
-import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc, collection, addDoc } from "firebase/firestore";
+import { initializeApp, getApps } from "firebase/app";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+} from "firebase/auth";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  addDoc,
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyA9x4pxC7mD1vEy2JhdvRlmyp3bilVQwNo",
@@ -13,14 +28,25 @@ const firebaseConfig = {
   measurementId: "G-G41047VVLY"
 };
 
-// Initialize Firebase
-let app;
-if (typeof window !== "undefined") {
-    app = initializeApp(firebaseConfig);
-}
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-const auth = app ? getAuth(app) : null;
+const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
-const db = app ? getFirestore(app) : null;
+const db = getFirestore(app);
 
-export { auth, provider, signInWithPopup, signOut, db, doc, setDoc, getDoc, collection, addDoc };
+export {
+  auth,
+  provider,
+  signInWithPopup,
+  signOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  db,
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  addDoc,
+};

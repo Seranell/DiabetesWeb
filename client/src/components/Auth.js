@@ -1,88 +1,316 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { auth, provider, signInWithPopup, signOut, db, doc, setDoc, getDoc } from '../../firebaseConfig';
 import { useRouter } from 'next/navigation';
+import {
+  auth,
+  provider,
+  signInWithPopup,
+  signOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+  sendEmailVerification,
+  db
+} from '../../firebaseConfig';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
+import { FcGoogle } from 'react-icons/fc';
 
 export default function AuthComponent() {
-    const [user, setUser] = useState(null);
-    const router = useRouter();
+  const [user, setUser] = useState(null);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const router = useRouter();
 
-    useEffect(() => {
-        const unsubscribe = auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                const userDoc = doc(db, "users", user.uid);
-                const docSnap = await getDoc(userDoc);
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        if (!user.emailVerified) {
+          alert('Your email is not verified. A verification email has been resent.');
+          await sendEmailVerification(user);
+          await signOut(auth);
+          return;
+        }
 
-                // Create user document if it does not exist
-                if (!docSnap.exists()) {
-                    await setDoc(userDoc, {
-                        name: user.displayName,
-                        email: user.email,
-                        photo: user.photoURL,
-                        createdAt: new Date()
-                    });
-                }
+        const userDoc = doc(db, "users", user.uid);
+        const docSnap = await getDoc(userDoc);
 
-                setUser({
-                    name: user.displayName,
-                    email: user.email,
-                    photo: user.photoURL
-                });
+        if (!docSnap.exists()) {
+          await setDoc(userDoc, {
+            name: user.displayName,
+            username,
+            email: user.email,
+            photo: user.photoURL,
+            createdAt: new Date()
+          });
+        }
 
-                // ✅ Check for correctionValues and mealValues sub-collections
-                const correctionValuesRef = doc(db, "users", user.uid, "correctionValues", "data");
-                const mealValuesRef = doc(db, "users", user.uid, "mealValues", "data");
-
-                const correctionSnap = await getDoc(correctionValuesRef);
-                const mealSnap = await getDoc(mealValuesRef);
-
-                // ✅ Determine route based on data presence
-                if (correctionSnap.exists() && mealSnap.exists()) {
-                    router.push('/dashboard');
-                } else {
-                    router.push('/carb');
-                }
-            } else {
-                setUser(null);
-            }
+        setUser({
+          name: user.displayName,
+          email: user.email,
+          photo: user.photoURL
         });
 
-        return () => unsubscribe();
-    }, [router]);
+        const correctionValuesRef = doc(db, "users", user.uid, "correctionValues", "data");
+        const mealValuesRef = doc(db, "users", user.uid, "mealValues", "data");
 
-    const handleSignIn = async () => {
-        try {
-            provider.setCustomParameters({ prompt: 'select_account' });
-            await signInWithPopup(auth, provider);
-        } catch (error) {
-            console.error("Sign-In Error:", error);
-            alert(`Error signing in: ${error.message}`);
+        const correctionSnap = await getDoc(correctionValuesRef);
+        const mealSnap = await getDoc(mealValuesRef);
+
+        if (correctionSnap.exists() && mealSnap.exists()) {
+          router.push('/dashboard');
+        } else {
+          router.push('/carb');
         }
-    };
+      } else {
+        setUser(null);
+      }
+    });
 
-    const handleSignOut = async () => {
-        try {
-            await signOut(auth);
-            router.push('/');
-        } catch (error) {
-            console.error("Logout Error:", error);
-            alert(`Error signing out: ${error.message}`);
+    return () => unsubscribe();
+  }, [router]);
+
+  const handleEmailPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+    setEmailSent(false);
+
+    if (isSignUp) {
+      if (password !== confirmPassword) {
+        setError('Passwords do not match');
+        setLoading(false);
+        return;
+      }
+
+      const usernameRef = doc(db, 'usernames', username);
+      const usernameSnap = await getDoc(usernameRef);
+      if (usernameSnap.exists()) {
+        setError('Username already taken');
+        setLoading(false);
+        return;
+      }
+    }
+
+    try {
+      if (isSignUp) {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const newUser = userCredential.user;
+
+        await newUser.updateProfile({ displayName });
+
+        await setDoc(doc(db, 'users', newUser.uid), {
+          name: displayName,
+          username,
+          email,
+          photo: newUser.photoURL || null,
+          createdAt: new Date()
+        });
+
+        await setDoc(doc(db, 'usernames', username), {
+          uid: newUser.uid
+        });
+
+        await sendEmailVerification(newUser);
+        setEmailSent(true);
+        alert('Verification email sent. Please check your inbox.');
+        await signOut(auth);
+      } else {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const loggedInUser = userCredential.user;
+
+        if (!loggedInUser.emailVerified) {
+          await sendEmailVerification(loggedInUser);
+          await signOut(auth);
+          setError('Your email is not verified. A verification email has been sent.');
+          return;
         }
-    };
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="p-4 max-w-sm mx-auto mt-20 text-center">
-            {user ? (
-                <div>
-                    <img src={user.photo} alt="User Photo" className="rounded-full w-16 h-16 mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold">Welcome, {user.name}</h2>
-                    <p className="text-sm text-gray-500">{user.email}</p>
-                    <button className="mt-4" onClick={handleSignOut}>Sign Out</button>
-                </div>
-            ) : (
-                <button onClick={handleSignIn}>Sign In with Google</button>
-            )}
+  const handleSignInWithGoogle = async () => {
+    try {
+      provider.setCustomParameters({ prompt: 'select_account' });
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      alert(`Error signing in: ${error.message}`);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push('/');
+    } catch (error) {
+      alert(`Error signing out: ${error.message}`);
+    }
+  };
+
+  return (
+    <div className="max-w-md mx-auto p-4">
+      {user ? (
+        <div className="text-center mb-6">
+          <img src={user.photo} alt="User Photo" className="rounded-full w-16 h-16 mx-auto mb-3" />
+          <h2 className="text-2xl font-bold">{user.name}</h2>
+          <p className="text-sm text-gray-500">{user.email}</p>
+          <button
+            onClick={handleSignOut}
+            className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+          >
+            Sign Out
+          </button>
         </div>
-    );
+      ) : (
+        <div>
+          <h2 className="text-3xl font-bold mb-4">{isSignUp ? 'Sign Up' : 'Log In'}</h2>
+
+          <form onSubmit={handleEmailPasswordSubmit} className="space-y-4">
+            {isSignUp && (
+              <>
+                <div>
+                  <label className="block text-lg font-medium mb-1">Display Name</label>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-lg font-medium mb-1">Username</label>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+              </>
+            )}
+
+            <div>
+              <label className="block text-lg font-medium mb-1">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+
+            <div>
+              <label className="block text-lg font-medium mb-1">Password</label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 left-3 flex items-center text-gray-500"
+                  tabIndex={-1}
+                >
+                  {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                </button>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+            </div>
+
+            {isSignUp && (
+              <div>
+                <label className="block text-lg font-medium mb-1">Confirm Password</label>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+            )}
+
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {emailSent && (
+              <p className="text-green-600 text-sm">
+                A verification email has been sent. Please check your inbox.
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className={`w-full px-4 py-2 rounded-lg ${
+                loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600 text-white'
+              }`}
+              disabled={loading}
+            >
+              {loading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Log In'}
+            </button>
+          </form>
+
+          {!isSignUp && (
+            <div className="text-center mt-4">
+              <button
+                onClick={async () => {
+                  try {
+                    await sendPasswordResetEmail(auth, email);
+                    alert('Password reset email sent!');
+                  } catch (error) {
+                    alert(error.message);
+                  }
+                }}
+                className="text-blue-500 text-sm"
+              >
+                Forgot Password?
+              </button>
+            </div>
+          )}
+
+          <div className="text-center mt-4">
+            <p className="text-sm">
+              {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
+              <span
+                onClick={() => {
+                  setIsSignUp(!isSignUp);
+                  setError('');
+                }}
+                className="text-blue-600 cursor-pointer font-medium"
+              >
+                {isSignUp ? 'Log In' : 'Sign Up'}
+              </span>
+            </p>
+          </div>
+
+          <div className="text-center mt-6">
+            <button
+              onClick={handleSignInWithGoogle}
+              className="inline-flex items-center justify-center w-12 h-12 bg-white border border-gray-300 rounded-full shadow-sm hover:shadow-md"
+            >
+              <FcGoogle size={24} />
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

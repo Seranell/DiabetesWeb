@@ -72,7 +72,9 @@ const Calculation = () => {
   }, [carbEntries, mealValues, selectedMeal, penType]);
 
   useEffect(() => {
-    if (currentBG !== null) {
+    if (currentBG !== null
+      
+    ) {
       const correctionFactor = correctionValues[`${selectedMeal}I`] || 0;
       if(currentBG < 3.9){
         setWarningMsg('Hypo Warning: Blood Sugars are low, please follow advice given by your gp or nurse')

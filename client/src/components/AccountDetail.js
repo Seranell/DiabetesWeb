@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { db, auth, provider, signOut } from '../../firebaseConfig';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, deleteUser } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
+
 
 const AccountDetails = () => {
   const [correctionValues, setCorrectionValues] = useState({});
@@ -108,6 +109,25 @@ const AccountDetails = () => {
     setEditMode(false);
   };
 
+  const handleDeleteAccount = async () => {
+    if (!auth.currentUser) return;
+  
+    const confirmDelete = window.confirm("Are you sure you want to delete your account? This action cannot be undone.");
+  
+    if (!confirmDelete) return;
+  
+    try {
+      await setDoc(doc(db, 'users', auth.currentUser.uid), {}, { merge: false });  
+      await deleteUser(auth.currentUser);
+      alert("Account deleted successfully.");
+      router.push("/");
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      alert(`Failed to delete account: ${error.message}`);
+    }
+  };
+  
+
   return (
     <div className="max-w-md p-4">
       {user && (
@@ -206,6 +226,12 @@ const AccountDetails = () => {
           </button>
         )}
       </div>
+      <button
+  onClick={handleDeleteAccount}
+  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-800 mt-2"
+>
+  Delete Account
+</button>
     </div>
   );
 };
