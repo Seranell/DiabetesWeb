@@ -73,7 +73,7 @@ const Calculation = () => {
 
   useEffect(() => {
     if (currentBG !== null
-      
+
     ) {
       const correctionFactor = correctionValues[`${selectedMeal}I`] || 0;
       if(currentBG < 3.9){
@@ -134,6 +134,7 @@ const Calculation = () => {
         carbDose,
         totalInsulinDose,
         notes,
+        currentBG,
         timestamp: new Date().toISOString(),
       };
 

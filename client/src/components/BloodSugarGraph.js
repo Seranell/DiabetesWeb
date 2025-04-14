@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Line } from 'react-chartjs-2';
 import 'chartjs-adapter-date-fns';
-import { parse } from 'date-fns';
+import { parseISO } from 'date-fns';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,6 +13,10 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+
+import { collection, getDocs } from 'firebase/firestore';
+import { db, auth } from '../../firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 
 ChartJS.register(
   CategoryScale,
@@ -27,12 +31,32 @@ ChartJS.register(
 
 const Graph = () => {
   const [diaryData, setDiaryData] = useState([]);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    fetch('https://diabetesweb-backend.onrender.com/api/diary')
-      .then((response) => response.json())
-      .then((data) => setDiaryData(data))
-      .catch((error) => console.error('Error fetching diary data:', error));
+    const fetchDiary = async (uid) => {
+      try {
+        const diaryRef = collection(db, 'users', uid, 'diary');
+        const snapshot = await getDocs(diaryRef);
+        const data = snapshot.docs
+          .map(doc => doc.data())
+          .filter(entry => entry.currentBG !== undefined && entry.timestamp)
+          .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+        setDiaryData(data);
+      } catch (error) {
+        console.error('Error fetching diary data:', error);
+      }
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+        fetchDiary(user.uid);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const today = new Date();
@@ -42,25 +66,18 @@ const Graph = () => {
   startOfWeek.setDate(today.getDate() - today.getDay() + 1);
   startOfWeek.setHours(0, 0, 0, 0);
 
-  const dateFormat = 'yyyy-MM-dd HH:mm'; 
-
   const filteredDiaryData = diaryData.filter((entry) => {
-    const entryDate = parse(`${entry.date} ${entry.time || '00:00'}`, 'yyyy-MM-dd HH:mm', new Date());
+    const entryDate = parseISO(entry.timestamp);
     entryDate.setHours(0, 0, 0, 0);
     return entryDate >= startOfWeek;
   });
 
-  console.log('Filtered Diary Data:', filteredDiaryData);
-
   const data = {
-    labels: filteredDiaryData.map((entry) =>
-      parse(`${entry.date} ${entry.time || '00:00'}`, dateFormat, new Date())
-    ),
     datasets: [
       {
         label: 'Current Blood Glucose',
         data: filteredDiaryData.map((entry) => ({
-          x: parse(`${entry.date} ${entry.time || '00:00'}`, dateFormat, new Date()),
+          x: parseISO(entry.timestamp),
           y: entry.currentBG,
         })),
         borderColor: 'rgba(255, 99, 132, 1)',
@@ -106,10 +123,7 @@ const Graph = () => {
         callbacks: {
           label: function (context) {
             const label = context.dataset.label || '';
-            if (label) {
-              return `${label}: ${context.raw.y}`;
-            }
-            return context.raw.y;
+            return label ? `${label}: ${context.raw.y}` : context.raw.y;
           },
         },
       },

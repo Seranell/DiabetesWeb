@@ -12,6 +12,7 @@ const Diary = () => {
     timestamp: '',
     selectedMeal: '',
     carbEntries: [],
+    currentBG: '',
     correctionDose: '',
     carbDose: '',
     totalInsulinDose: '',
@@ -71,7 +72,7 @@ const Diary = () => {
       const docRef = doc(collection(db, 'users', userId, 'diary'));
       await setDoc(docRef, newEntry);
       fetchEntries(userId);
-      setNewEntry({ timestamp: '', selectedMeal: '', carbEntries: [], correctionDose: '', carbDose: '', totalInsulinDose: '', notes: '' });
+      setNewEntry({ timestamp: '', selectedMeal: '', carbEntries: [], currentBG: '', correctionDose: '', carbDose: '', totalInsulinDose: '', notes: '' });
       setIsAdding(false);
     } catch (error) {
       console.error('Error adding entry:', error);
@@ -84,6 +85,7 @@ const Diary = () => {
       timestamp: now.toISOString(),
       selectedMeal: '',
       carbEntries: [],
+      currentBG: '',
       correctionDose: '',
       carbDose: '',
       totalInsulinDose: '',
