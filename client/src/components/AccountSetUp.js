@@ -10,14 +10,22 @@ import { updateProfile } from 'firebase/auth';
 export default function AccountSetup() {
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
-  const [photoURL, setPhotoURL] = useState(null);
+  const [photoURL, setPhotoURL] = useState('');
   const [file, setFile] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    if (!auth.currentUser) router.push('/');
+    const user = auth.currentUser;
+    if (!user) {
+      router.push('/');
+      return;
+    }
+
+    // Prefill name and photo from auth
+    setDisplayName(user.displayName || '');
+    setPhotoURL(user.photoURL || 'https://www.gravatar.com/avatar/?d=mp');
   }, []);
 
   const handleFileChange = (e) => {
@@ -52,8 +60,8 @@ export default function AccountSetup() {
         return;
       }
 
-      // Upload image if selected
-      let finalPhotoURL = 'https://www.gravatar.com/avatar/?d=mp';
+      // Upload image if user selected a new one
+      let finalPhotoURL = user.photoURL || 'https://www.gravatar.com/avatar/?d=mp';
       if (file) {
         const storageRef = ref(storage, `profilePictures/${user.uid}`);
         await uploadBytes(storageRef, file);
@@ -66,7 +74,7 @@ export default function AccountSetup() {
         photoURL: finalPhotoURL,
       });
 
-      // Save user profile data to Firestore
+      // Save user data to Firestore
       await setDoc(doc(db, 'users', user.uid), {
         name: displayName,
         username,

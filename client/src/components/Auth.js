@@ -41,7 +41,7 @@ export default function AuthComponent() {
         const userDoc = doc(db, 'users', user.uid);
         const docSnap = await getDoc(userDoc);
 
-        if (!docSnap.exists()) {
+        if (!docSnap.exists() || !docSnap.data().username) {
           router.push('/account-setup');
           return;
         }
@@ -101,6 +101,14 @@ export default function AuthComponent() {
           await signOut(auth);
           return;
         }
+
+        const userDoc = doc(db, 'users', loggedInUser.uid);
+        const docSnap = await getDoc(userDoc);
+
+        if (!docSnap.exists() || !docSnap.data().username) {
+          router.push('/account-setup');
+          return;
+        }
       }
     } catch (error) {
       setError(error.message);
@@ -112,7 +120,25 @@ export default function AuthComponent() {
   const handleSignInWithGoogle = async () => {
     try {
       provider.setCustomParameters({ prompt: 'select_account' });
-      await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, provider);
+      const googleUser = result.user;
+
+      if (!googleUser.emailVerified) {
+        await sendEmailVerification(googleUser);
+        alert('A verification email has been sent. Please verify your email to continue.');
+        await signOut(auth);
+        return;
+      }
+
+      const userDocRef = doc(db, 'users', googleUser.uid);
+      const userSnap = await getDoc(userDocRef);
+
+      if (!userSnap.exists() || !userSnap.data().username) {
+        router.push('/account-setup');
+        return;
+      }
+
+      router.push('/dashboard');
     } catch (error) {
       alert(`Error signing in: ${error.message}`);
     }
