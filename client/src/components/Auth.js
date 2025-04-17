@@ -13,7 +13,7 @@ import {
   sendEmailVerification,
   db
 } from '../../firebaseConfig';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 
@@ -22,8 +22,6 @@ export default function AuthComponent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [displayName, setDisplayName] = useState('');
-  const [username, setUsername] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,23 +33,17 @@ export default function AuthComponent() {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         if (!user.emailVerified) {
-          alert('Your email is not verified. A verification email has been resent.');
-          await sendEmailVerification(user);
+          setError('Please verify your email before logging in.');
           await signOut(auth);
           return;
         }
 
-        const userDoc = doc(db, "users", user.uid);
+        const userDoc = doc(db, 'users', user.uid);
         const docSnap = await getDoc(userDoc);
 
         if (!docSnap.exists()) {
-          await setDoc(userDoc, {
-            name: user.displayName,
-            username,
-            email: user.email,
-            photo: user.photoURL,
-            createdAt: new Date()
-          });
+          router.push('/account-setup');
+          return;
         }
 
         setUser({
@@ -60,8 +52,8 @@ export default function AuthComponent() {
           photo: user.photoURL
         });
 
-        const correctionValuesRef = doc(db, "users", user.uid, "correctionValues", "data");
-        const mealValuesRef = doc(db, "users", user.uid, "mealValues", "data");
+        const correctionValuesRef = doc(db, 'users', user.uid, 'correctionValues', 'data');
+        const mealValuesRef = doc(db, 'users', user.uid, 'mealValues', 'data');
 
         const correctionSnap = await getDoc(correctionValuesRef);
         const mealSnap = await getDoc(mealValuesRef);
@@ -85,40 +77,16 @@ export default function AuthComponent() {
     setError('');
     setEmailSent(false);
 
-    if (isSignUp) {
-      if (password !== confirmPassword) {
-        setError('Passwords do not match');
-        setLoading(false);
-        return;
-      }
-
-      const usernameRef = doc(db, 'usernames', username);
-      const usernameSnap = await getDoc(usernameRef);
-      if (usernameSnap.exists()) {
-        setError('Username already taken');
-        setLoading(false);
-        return;
-      }
+    if (isSignUp && password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
     }
 
     try {
       if (isSignUp) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const newUser = userCredential.user;
-
-        await newUser.updateProfile({ displayName });
-
-        await setDoc(doc(db, 'users', newUser.uid), {
-          name: displayName,
-          username,
-          email,
-          photo: newUser.photoURL || null,
-          createdAt: new Date()
-        });
-
-        await setDoc(doc(db, 'usernames', username), {
-          uid: newUser.uid
-        });
 
         await sendEmailVerification(newUser);
         setEmailSent(true);
@@ -129,9 +97,8 @@ export default function AuthComponent() {
         const loggedInUser = userCredential.user;
 
         if (!loggedInUser.emailVerified) {
-          await sendEmailVerification(loggedInUser);
+          setError('Your email is not verified. Please check your inbox.');
           await signOut(auth);
-          setError('Your email is not verified. A verification email has been sent.');
           return;
         }
       }
@@ -179,32 +146,6 @@ export default function AuthComponent() {
           <h2 className="text-3xl font-bold mb-4">{isSignUp ? 'Sign Up' : 'Log In'}</h2>
 
           <form onSubmit={handleEmailPasswordSubmit} className="space-y-4">
-            {isSignUp && (
-              <>
-                <div>
-                  <label className="block text-lg font-medium mb-1">Display Name</label>
-                  <input
-                    type="text"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-lg font-medium mb-1">Username</label>
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value.toLowerCase())}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  />
-                </div>
-              </>
-            )}
-
             <div>
               <label className="block text-lg font-medium mb-1">Email</label>
               <input

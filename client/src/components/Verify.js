@@ -26,7 +26,7 @@ export default function VerifyEmailPage() {
         await auth.currentUser?.reload();
 
         setTimeout(() => {
-          router.push('/carb');
+          router.push('/');
         }, 2000);
       } catch (error) {
         console.error('Verification error:', error);
