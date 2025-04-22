@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../../firebaseConfig'; // Firebase config
+import { db } from '../../firebaseConfig';
 import Link from 'next/link';
 
 const RecipeSearch = () => {
@@ -9,7 +9,6 @@ const RecipeSearch = () => {
   const [filteredRecipes, setFilteredRecipes] = useState([]);
   const [sortBy, setSortBy] = useState('');
 
-  // Fetch recipes from Firebase
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
@@ -39,7 +38,6 @@ const RecipeSearch = () => {
     fetchRecipes();
   }, []);
 
-  // Handle search
   useEffect(() => {
     if (!search.trim()) {
       setFilteredRecipes(recipes);
@@ -53,7 +51,6 @@ const RecipeSearch = () => {
     setFilteredRecipes(results);
   }, [search, recipes]);
 
-  // Sorting functionality
   const handleSort = (nutrient) => {
     setSortBy(nutrient);
 

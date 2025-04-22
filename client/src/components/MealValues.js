@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation'; // ✅ Use next/navigation for routing
+import { useRouter } from 'next/navigation';
 import { db, auth } from '../../firebaseConfig';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -15,9 +15,8 @@ const MealValues = () => {
   });
   const [userId, setUserId] = useState(null);
   const [isValid, setIsValid] = useState(false);
-  const router = useRouter(); // ✅ Initialize router
+  const router = useRouter();
 
-  // Listen for user authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -30,7 +29,6 @@ const MealValues = () => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch existing meal values on component mount
   useEffect(() => {
     const fetchMealValues = async () => {
       if (!userId) return;

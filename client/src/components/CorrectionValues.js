@@ -13,14 +13,13 @@ const CorrectionValues = () => {
     dinnerI: '',
     supperI: '',
     targetBlood: '',
-    penType: 'child', // Default to child pen
+    penType: 'child',
   });
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
   const [isValid, setIsValid] = useState(false);
   const router = useRouter();
 
-  // Listen to authentication state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -33,7 +32,6 @@ const CorrectionValues = () => {
     return () => unsubscribe();
   }, []);
 
-  // Fetch correction values
   useEffect(() => {
     const fetchCorrectionValues = async () => {
       if (!userId) return;
@@ -63,11 +61,8 @@ const CorrectionValues = () => {
     fetchCorrectionValues();
   }, [userId]);
 
-  // ✅ Improved Validation Logic
   useEffect(() => {
-    // Check that all fields are filled and have valid numbers
     const allFieldsFilled = Object.entries(correctionValues).every(([key, value]) => {
-      // Ensure penType can be 'child' or 'adult' and numbers are valid
       if (key === "penType") {
         return value === "child" || value === "adult";
       }
@@ -77,7 +72,6 @@ const CorrectionValues = () => {
     setIsValid(allFieldsFilled);
   }, [correctionValues]);
 
-  // Handle input changes
   const handleChange = (event) => {
     const { id, value, type, checked, name } = event.target;
 
@@ -87,7 +81,6 @@ const CorrectionValues = () => {
     }));
   };
 
-  // Save correction values and navigate
   const saveCorrectionValues = async () => {
     if (!userId) {
       setError('You must be logged in to save your data');
@@ -100,7 +93,7 @@ const CorrectionValues = () => {
 
       alert('Correction values saved successfully');
       setError(null);
-      router.push('/dashboard'); // Redirect after saving
+      router.push('/dashboard');
     } catch (error) {
       console.error('Failed to save correction values:', error);
       setError('Failed to save correction values');

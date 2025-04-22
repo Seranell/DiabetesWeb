@@ -5,13 +5,11 @@ import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 
 export default function Dashboard() {
-  // State variables
   const [userId, setUserId] = useState(null);
   const [user, setUser] = useState(null);
   const [correctionValues, setCorrectionValues] = useState({});
   const [mealValues, setMealValues] = useState({});
 
-  // Listen for auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -30,7 +28,6 @@ export default function Dashboard() {
     return () => unsubscribe();
   }, []);
 
-  // Fetch user data
   useEffect(() => {
     const fetchData = async () => {
       if (!userId) return;
@@ -54,7 +51,6 @@ export default function Dashboard() {
     fetchData();
   }, [userId]);
 
-  // Handle sign out
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -66,12 +62,10 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-tr from-black to-gray-800 text-white flex flex-col items-center justify-center p-6">
-      {/* Greeting */}
       <h1 className="text-4xl font-bold mb-8">
         Welcome, {user?.name || "User"}!
       </h1>
 
-      {/* Navigation Links */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <a
           href="/calculation"
