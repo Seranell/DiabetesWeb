@@ -1,4 +1,4 @@
-// File: C:\Users\pink_\OneDrive\Desktop\DiabetesWeb\client\src\app\page.jsx
+// File: C:\Users\pink_\Desktop\Honours Final\DiabetesWeb\client\src\app\page.jsx
 import * as entry from '../../../src/app/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
