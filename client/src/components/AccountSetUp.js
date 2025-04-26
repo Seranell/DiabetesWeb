@@ -19,7 +19,7 @@ export default function AccountSetup() {
   useEffect(() => {
     const user = auth.currentUser;
     if (!user) {
-      router.push('/');
+      router.push('/carb');
       return;
     }
 
