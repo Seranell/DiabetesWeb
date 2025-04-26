@@ -3,6 +3,10 @@ import { useState, useEffect } from 'react';
 import { db, auth, signOut } from '../../firebaseConfig';
 import { doc, getDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
+import { AiOutlineCalculator } from 'react-icons/ai';
+import { FaRegCalendarAlt } from 'react-icons/fa';
+import { MdAccountCircle } from 'react-icons/md';
+import { FaUtensils } from 'react-icons/fa';
 
 export default function Dashboard() {
   const [userId, setUserId] = useState(null);
@@ -69,77 +73,36 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <a
           href="/calculation"
-          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105"
+          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center"
         >
-          <div className="text-blue-400 mb-4">
-            <svg
-              className="w-12 h-12"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M8 9h8M8 13h5m-1 8a9 9 0 100-18 9 9 0 000 18z" />
-            </svg>
-          </div>
+          <AiOutlineCalculator className="w-12 h-12 text-blue-400 mb-4" />
           <h2 className="text-lg font-semibold">Calculation</h2>
         </a>
 
         <a
           href="/diary"
-          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105"
+          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center"
         >
-          <div className="text-green-400 mb-4">
-            <svg
-              className="w-12 h-12"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
+          <FaRegCalendarAlt className="w-12 h-12 text-green-400 mb-4" />
           <h2 className="text-lg font-semibold">Diary</h2>
         </a>
 
         <a
           href="/account"
-          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105"
+          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center"
         >
-          <div className="text-yellow-400 mb-4">
-            <svg
-              className="w-12 h-12"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M5.121 17.804A13.937 13.937 0 0112 15c2.485 0 4.822.63 6.879 1.804M15 11a3 3 0 11-6 0 3 3 0 016 0zm-9 7a9 9 0 1118 0 9 9 0 01-18 0z" />
-            </svg>
-          </div>
+          <MdAccountCircle className="w-12 h-12 text-yellow-400 mb-4" />
           <h2 className="text-lg font-semibold">Account</h2>
         </a>
 
         <a
           href="/recipes"
-          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105"
+          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center"
         >
-          <div className="text-red-400 mb-4">
-            <svg
-              className="w-12 h-12"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path d="M20 12H4m16 0a8 8 0 10-16 0 8 8 0 0016 0z" />
-            </svg>
-          </div>
+          <FaUtensils className="w-12 h-12 text-red-400 mb-4" />
           <h2 className="text-lg font-semibold">Recipes</h2>
         </a>
       </div>
-
     </div>
   );
 }
