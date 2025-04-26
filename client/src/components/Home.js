@@ -71,34 +71,29 @@ export default function Dashboard() {
       </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <a
-          href="/calculation"
-          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center"
-        >
+        <a href="/calculation"
+          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center">
+          
           <AiOutlineCalculator className="w-12 h-12 text-blue-400 mb-4" />
           <h2 className="text-lg font-semibold">Calculation</h2>
         </a>
 
-        <a
-          href="/diary"
-          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center"
-        >
+        <a href="/diary"
+          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center">
           <FaRegCalendarAlt className="w-12 h-12 text-green-400 mb-4" />
+
           <h2 className="text-lg font-semibold">Diary</h2>
         </a>
 
-        <a
-          href="/account"
-          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center"
-        >
+        <a href="/account"
+          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center">
+
           <MdAccountCircle className="w-12 h-12 text-yellow-400 mb-4" />
           <h2 className="text-lg font-semibold">Account</h2>
         </a>
 
-        <a
-          href="/recipes"
-          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center"
-        >
+        <a href="/recipes"
+          className="bg-gray-700 hover:bg-gray-600 p-6 rounded-lg shadow-lg transition duration-200 ease-in-out transform hover:scale-105 flex flex-col items-center">
           <FaUtensils className="w-12 h-12 text-red-400 mb-4" />
           <h2 className="text-lg font-semibold">Recipes</h2>
         </a>
