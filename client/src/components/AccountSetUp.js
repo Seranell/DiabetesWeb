@@ -87,7 +87,7 @@ export default function AccountSetup() {
         uid: user.uid,
       });
 
-      router.push('/dashboard');
+      router.push('/carb');
     } catch (err) {
       setError(err.message);
     } finally {
